@@ -1,6 +1,4 @@
-#
 # sighte - simple webkit-based browser
-#
 
 sighte is a simple Web browser using the WebKit2 layout engine, the
 JavascriptCore evaluation library, and GTK3+ as main GUI.
@@ -12,7 +10,9 @@ sort of overly simplistic browser with not much functionality.
 The code itself is based off of a fork of the surf browser created by the
 team at surf.suckless.org, which they implemented in Webkit1 and GTK2,
 using dmenu as a way to interact with X11. This project borrows from their
-original design and parts of their code base.
+original design and parts of their code base. However, the code is rather
+different and relies on GTK3 and glibc for various functionality instead
+of the suckless libraries / binaries.
 
 Parts of it are still broken from the transition to Wekbit2 and GTK3+ which
 are *quite* a bit different. It is not recommended to use this browser as a
@@ -23,9 +23,7 @@ Perhaps one day it will be completed, but for now it is still fairly usable
 even in its current form.
 
 
-#
 # Requirements
-#
 
 Specifically, the following packages are required:
 
@@ -37,9 +35,7 @@ Recommend examining the Makefile for more details if you are unable to get
 sighte to properly compile.
 
 
-#
 # Installation
-#
 
 Edit the Makefile to adjust the respective Webkit2 / GTK3 requirements to
 their proper places.
@@ -49,18 +45,14 @@ necessary as root):
 
     make clean install
 
-#
 # Running sighte
-#
 
 sighte [-DfFgGiImMpPsSvx] [-a cookiepolicies] [-c cookiefile]
        [-r scriptfile] [-t stylefile] [-z zoomlevel] [URI]
 
 See the manpage for further options.
 
-#
-# Author
-#
+# Authors
 
 The original authors of the surf web browser were the suckless.org
 community. For more information, consider contacting them at:
