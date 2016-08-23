@@ -839,7 +839,6 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     }
 
     // Variable declaration
-    Arg arg;
     WebKitNavigationAction *n;
     WebKitURIRequest *r;
 
@@ -892,15 +891,21 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
         return false;
     }
 
-    // Grab the URI needed to get to the new page.
-    arg.v = (void *)webkit_uri_request_get_uri(r);
+    // Grab the URI needed to get to the new page, assuming the client has
+    // not yet been destroyed.
+    if (c) {
+        print_debug("decidepolicy() --> Policy decision requests the "
+                    "following URI:");
+        print_debug(webkit_uri_request_get_uri(r));
+        c->linkhover = (char *) webkit_uri_request_get_uri(r);
+    }
 
     // Clean up the memory used by the URI object.
     free(r);
 
     // Pass along the chain of arguments to the newly generated window.
     print_debug("decidepolicy() --> Generating new browser window...");
-    newwindow(NULL, &arg, 0);
+    newwindow(c, NULL, 0);
 
     // With the signal handled as intended, send the complete flag back.
     return true;
@@ -1136,6 +1141,7 @@ char* geturi(Client *c)
     }
 
     // Otherwise return the URI as a string.
+    print_debug("geturi() --> Attempting to grab URI.");
     return (char *)webkit_web_view_get_uri(c->view);
 }
 
@@ -1408,7 +1414,8 @@ void loadstatuschange(WebKitWebView *view, WebKitLoadEvent *e, Client *c)
             soup_cache_dump(diskcache);
         }
 
-        // All done here
+        // All done here.
+        print_debug("loadstatuschange() --> Page load completed.");
         return;
     } 
 
@@ -1456,10 +1463,19 @@ void loaduri(Client *c, const Arg *arg)
     Arg a = { .b = FALSE };
     struct stat st;
 
-    // Sanity check, make sure we got a valid URI.
+    // Sanity check, make sure this got back a string.
+    if (!uri || !strlen(uri)) {
+        return;
+    }
+
+    // Further sanity checks, make sure we got a valid URI.
     if (strcmp(uri, "") == 0) {
         return;
     }
+
+    // If in debug mode, attempt to print out the URI load request string.
+    print_debug("loaduri() --> Attempting to load the following URI:");
+    print_debug(uri);
 
     // Stat our URI string, make sure we weren't accidently given a file
     // path or directory.
@@ -1810,7 +1826,7 @@ void newwindow(Client *c, const Arg *arg, bool noembed)
 {
     // Variable declaration
     unsigned int i = 0;
-    const char *cmd[18], *uri;
+    const char *cmd[18];
     const Arg a = { .v = (void *)cmd };
 
     // Append our program name.
@@ -1850,10 +1866,12 @@ void newwindow(Client *c, const Arg *arg, bool noembed)
         cmd[i++] = "-D";
     }
 
-    // If we got a new URI, use it...
-    uri = arg->v ? (char *)arg->v : c->linkhover;
-    if (uri) {
-        cmd[i++] = uri;
+    // If a user clicked on a hyperlink or policy request, give the client
+    // that URI as we may need to switch to it.
+    if (c && c->linkhover && strlen(c->linkhover)) {
+        print_debug("newwindow() --> Target requested the following URI:");
+        print_debug(c->linkhover);
+        cmd[i++] = c->linkhover;
     }
 
     // Null terminate the command string.
@@ -1985,7 +2003,8 @@ void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
  */
 void linkopen(Client *c, const Arg *arg)
 {
-    newwindow(NULL, arg, 1);
+    print_debug("linkopen() --> Attempting to open new window...");
+    newwindow(c, arg, 1);
 }
 
 //! Open a new link in a new tab
@@ -1997,7 +2016,8 @@ void linkopen(Client *c, const Arg *arg)
  */
 void linkopenembed(Client *c, const Arg *arg)
 {
-    newwindow(NULL, arg, 0);
+    print_debug("linkopenembed() --> Attempting to open new window...");
+    newwindow(c, arg, 0);
 }
 
 //! Reload the current page
@@ -2873,10 +2893,14 @@ int main(int argc, char *argv[])
 
     // If given an URI argument, go ahead and use it.
     if (arg.v && strlen(arg.v)) {
+        print_debug("main() --> The following URL argument was given:");
+        print_debug(arg.v);
         loaduri(clients, &arg);
 
     // Otherwise take the browser to the default home page.
     } else {
+        print_debug("main() --> The following URL argument was given:");
+        print_debug(default_home_page);
         arg.v = default_home_page;
         loaduri(clients, &arg);
         updatetitle(c);
