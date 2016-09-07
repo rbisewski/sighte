@@ -124,13 +124,23 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     
     // Attempt to grab the requested URI (as a string).
     char *uri = (char *) webkit_uri_request_get_uri(req);
-    char *tmp_str = NULL;
+    char *quoted_uri = g_shell_quote(uri);
 
-    // Allocate some memory for our temp string; two extra [] for the " chars.
-    tmp_str = calloc(strlen(uri)+2, sizeof(char));
+    // Debug mode, tell the end-user that a signal was detected.
+    print_debug("prerequest() --> resource-load-started signal detected. "
+                "It requested the following URI:");
+    print_debug(uri);
 
     // Sanity check, end here if we got a blank string.
-    if (strlen(uri) < 1) {
+    if (strlen(uri) < 1 || strlen(quoted_uri) < 1) {
+        return;
+    }
+
+    // Attempt to crush the silly use of m3u8 playlists that can mangle
+    // certain video calls.
+    if (g_str_has_suffix(uri, ".m3u8")) {
+        print_debug("prerequest() --> A m3u8 playlist was requested. "
+                    "Halting request...");
         return;
     }
 
@@ -162,19 +172,16 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     // Send the signal to stop loading in *this* window.
     webkit_web_view_stop_loading(w);
 
-    // Quote the string to prevent possible issues...
-    sprintf(tmp_str, "\"%s\"", uri);
-    
     // Assemble the arguments we need.
     Arg arg = { .v = (char *[]){"/bin/sh",
                                 "-c",
                                 "xdg-open",
-                                (char *)tmp_str,
+                                quoted_uri,
                                 NULL}};
 
     // Afterwards free the temporary string 
-    if (tmp_str) { 
-        free(tmp_str);
+    if (quoted_uri) {
+        free(quoted_uri);
     }
 
     // Tell the end user that the closure assignments are complete.
@@ -801,11 +808,44 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p, Client *c)
          return false;
     }
 
+    // Variable declaration.
+    SoupMessageHeadersIter *iter = NULL;
+    const char *name  = NULL;
+    const char *value = NULL;
+
+    // Pull out the server's response to this browser's policy decision.
+    WebKitResponsePolicyDecision *rpd = (WebKitResponsePolicyDecision*) p;
+
+    // Grab the MIME-type from the HTTP response headers.
+    const char *mime_type
+      = webkit_uri_response_get_mime_type(
+      webkit_response_policy_decision_get_response(rpd));
+
+    // Grab the remainder of the headers.
+    SoupMessageHeaders *smh = webkit_uri_response_get_http_headers(
+      webkit_response_policy_decision_get_response(rpd));
+
+    // If no MIME-type was given, end here.
+    if (!rpd || !mime_type || strlen(mime_type) < 1) {
+
+        // Debug mode, tell the end-user this response gave a blank or
+        // invalid MIME-type.
+        print_debug("determine_if_download() --> Blank or invalid MIME-type "
+                    "response detected.");
+
+        // Consider the callback event complete.
+        return true;
+    }
+
     // If we *cannot* show the MIME type in a standard HTML manner, then
     // probably this a file to download. In that case, attempt to make a
     // policy decision on the download in question.
-    if (!webkit_response_policy_decision_is_mime_type_supported(
-      (WebKitResponsePolicyDecision*) p)) {
+    if (!webkit_response_policy_decision_is_mime_type_supported(rpd)) {
+
+        // Debug mode, tell the end-user that this request contains a
+        // MIME-type which suggests it is not HTML.
+        print_debug("determine_if_download() --> Non-HTML MIME-type "
+                    "request detected.");
 
         // Make a policy decision for download in question.
         webkit_policy_decision_download(p);
@@ -814,10 +854,52 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p, Client *c)
         return true;
     }
 
+    // Debug mode; this code attempt to print out all of the HTTP(S) response
+    // headers given.
+    if (debug_mode) {
+
+        // Assign a chunk of memory for the SoupMessageHeadersIter struct.
+        iter = (SoupMessageHeadersIter*) calloc(1,
+          sizeof(SoupMessageHeadersIter));
+
+        // Attempt to initialize the SoupMessageHeadersIter struct so that this
+        // can iterate thru all of the HTTP(S) headers.
+        soup_message_headers_iter_init(iter, smh);
+
+        // Sanity check, make sure this could initialize the iterator.
+        if (!iter) {
+            print_debug("determine_if_download() --> Unable to allocate "
+                        "memory for SoupMessageHeaders iterator structure!");
+            print_debug("determine_if_download() --> Terminating callback.");
+            return true;
+        }
+
+        // With the iterator initialized, attempt to iterate thru this
+        // mess-o-headers.
+        print_debug("\n===== HTTP/S Response Headers =====");
+        while (soup_message_headers_iter_next(iter, &name, &value)) {
+            print_debug(name);
+            print_debug("\n");
+            print_debug(value);
+            print_debug("------");
+        }
+        print_debug("======== Headers End Here =========\n");
+
+        // Attempt to free the memory used by SoupMesageHeadersIter structure.
+        free(iter);
+    }
+
+    // Attempt to clear memory used by the SoupMessageHeaders structure.
+    if (smh) {
+        soup_message_headers_clear(smh);
+    }
+
     // Otherwise the MIME type is compatible with this browser view, in which
-    // case it is likely a page of some sort. Ergo, this event is propagated
-    // further. Hopefully WebKit handles it correctly... 
-    return false;
+    // case it is likely a page of some sort. Ergo, elect to use it.
+    webkit_policy_decision_use(p);
+
+    // Having handled all possible cases, this request can terminate here.
+    return true;
 }
 
 //! Determine whether or not to open a new window. 
@@ -846,12 +928,19 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // it along to a function that will determine whether or not this is a
     // download response.
     if (t == WEBKIT_POLICY_DECISION_TYPE_RESPONSE) {
+        print_debug("decidepolicy() --> Policy decision request resembles a "
+                    "possible download.");
         return determine_if_download(view,p,c); 
     } 
 
     // Right now this function only handles navigation via links, so check
     // to ensure that the asserts the correct type.
     if (t != WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION) {
+
+        // Tell the end-user, in debug mode, that this does not appear to be
+        // a navigation request.
+        print_debug("decidepolicy() --> Policy decision request is not a "
+                    "HTTP/HTTPS navigation response.");
 
         // Since it is not, the event is propagated further. The good news is
         // that the rest of the default policy decision handlers for WebKit2
@@ -867,6 +956,9 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // propagate this further hoping some other signal handler will get the
     // correct type of policy decision.
     if (!n) {
+        print_debug("decidepolicy() --> Policy decision request is a null"
+                    "HTTP/HTTPS navigation response.");
+        print_debug("decidepolicy() --> Terminating due to null response.");
         return false;
     }
 
@@ -884,7 +976,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     r = webkit_navigation_action_get_request(n); 
     
     // As this function is now done with the nav-action, it ought to be freed.
-    free(n);
+    webkit_navigation_action_free(n);
 
     // Sanity check, make sure we got a URI request.
     if (!r) {
@@ -1333,7 +1425,7 @@ bool keypress(GtkAccelGroup *group, GObject *obj, unsigned int key,
  * @param   unsigned int          callback modifiers
  * @param   Client                current client
  *
- * @return 
+ * @return  none
  */
 void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
   unsigned int modifiers, Client *c)
@@ -1384,6 +1476,30 @@ void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
 
     // All ends well.
     return;
+}
+
+
+//! Callback for when the "load-failed" signal is given to the browser.
+/*!
+ * @param    WebKitWebView    given web view
+ * @param    WebKitLoadEvent  load event
+ * @param    string           URI that failed to load
+ * @param    GError           GTK error object with further details
+ * @param    Client           current client
+ *
+ * @return   bool             if cancel   --> true
+ *                            if continue --> false
+ */
+bool load_failed_callback(WebKitWebView *view, WebKitLoadEvent e,
+  char *failing_uri, GError *error, Client *c)
+{
+    // Debug mode, tell the end-user that a URI load has failed.
+    print_debug("load_failed_callback() --> The following URI has failed to "
+                "load:");
+    print_debug(failing_uri);
+
+    // Consider the event complete.
+    return true;
 }
 
 //! Adjust the Xwindow title based on whether or not the page is loading
@@ -1662,6 +1778,12 @@ Client* newclient(void)
                      G_CALLBACK(decidepolicy),
                      c);
 
+    // Assign the callback for the load-failed signal.
+    g_signal_connect(G_OBJECT(c->view),
+                     "load-failed",
+                     G_CALLBACK(load_failed_callback),
+                     c);
+
     // Assign the percentage load callback.
     g_signal_connect(G_OBJECT(c->view),
                      "load-changed",
@@ -1702,6 +1824,12 @@ Client* newclient(void)
     g_signal_connect(G_OBJECT(c->view),
                      "print",
                      G_CALLBACK(print_callback),
+                     c);
+
+    // Callback for when the WebView has crashed for some unknown reason.
+    g_signal_connect(G_OBJECT(c->view),
+                     "web-process-crashed",
+                     G_CALLBACK(web_process_crashed_callback),
                      c);
 
     // Assign the rendered pane to our client window
@@ -1894,6 +2022,11 @@ void newwindow(Client *c, const Arg *arg, bool noembed)
 bool contextmenu(WebKitWebView *view, WebKitContextMenu *menu,
   WebKitHitTestResult *target, GdkEvent *event, Client *c)
 {
+    // Debug mode, tell the end-user that a (custom?) context menu has been
+    // requested by a given web service.
+    print_debug("contextmenu() --> Context Menu signal detected.");
+
+    // Propagate the event further.
     return false;
 }
 
@@ -2692,6 +2825,25 @@ void usage(void)
 {
     terminate("usage: sighte [-DfFgGiImMpPsSvx] [-a cookiepolicies ] "
       "[-c cookiefile] [-r scriptfile] [-t stylefile] [-z zoomlevel] [uri]\n");
+}
+
+//! Callback for when a webview is given a "web-process-crashed" signal.
+/*!
+ * @param   WebKitWebView          current webview
+ * @param   Arg                    given list of arguments
+ *
+ * @return  bool     if cancel   --> true
+ *                   if continue --> false
+ */
+bool web_process_crashed_callback(WebKitWebView *v, const Arg *arg)
+{
+    // Tell the end-user since this callback has executed that a possible
+    // crash has occurred in one or more of the browser's WebKitWebView
+    // structures.
+    print_debug("web_process_crashed() --> Possible WebView crash detected!");
+
+    // Consider the event complete.
+    return true;
 }
 
 //! Adjust the current zoom level. 

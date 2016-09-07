@@ -452,9 +452,23 @@ bool keypress(GtkAccelGroup*, GObject*, unsigned int, GdkModifierType,
  * @param   unsigned int          callback modifiers
  * @param   Client                current client
  *
- * @return 
+ * @return  none
  */
 void mousetargetchanged(WebKitWebView*, WebKitHitTestResult*, unsigned int,
+  Client*);
+
+//! Callback for when the "load-failed" signal is given to the browser.
+/*!
+ * @param    WebKitWebView    given web view
+ * @param    WebKitLoadEvent  load event
+ * @param    string           URI that failed to load
+ * @param    GError           GTK error object with further details
+ * @param    Client           current client
+ *
+ * @return   bool             if cancel   --> true
+ *                            if continue --> false
+ */
+bool load_failed_callback(WebKitWebView*, WebKitLoadEvent, char*, GError*,
   Client*);
 
 //! Adjust the Xwindow title based on whether or not the page is loading
@@ -706,6 +720,16 @@ void updatewinid(Client*);
  *  @return  none
  */
 void usage(void);
+
+//! Callback for when a webview is given a "web-process-crashed" signal.
+/*!
+ * @param   WebKitWebView          current webview
+ * @param   Arg                    given list of arguments
+ *
+ * @return  bool     if cancel   --> true
+ *                   if continue --> false
+ */
+bool web_process_crashed_callback(WebKitWebView*, const Arg*);
 
 //! Adjust the current zoom level. 
 /*!
