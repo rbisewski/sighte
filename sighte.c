@@ -124,23 +124,42 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     
     // Attempt to grab the requested URI (as a string).
     char *uri = (char *) webkit_uri_request_get_uri(req);
-    char *quoted_uri = g_shell_quote(uri);
+    char *quoted_uri = NULL;
+
+    // Sanity check, end here if we got a blank string.
+    if (strlen(uri) < 1) {
+        print_debug("prerequest() --> Invalid or blank URI request. "
+                    "Halting request...");
+        return;
+    }
 
     // Debug mode, tell the end-user that a signal was detected.
     print_debug("prerequest() --> resource-load-started signal detected. "
                 "It requested the following URI:");
     print_debug(uri);
 
-    // Sanity check, end here if we got a blank string.
-    if (strlen(uri) < 1 || strlen(quoted_uri) < 1) {
-        return;
-    }
-
     // Attempt to crush the silly use of m3u8 playlists that can mangle
     // certain video calls.
     if (g_str_has_suffix(uri, ".m3u8")) {
+
+        // Tell the end-user this request was halted.
         print_debug("prerequest() --> A m3u8 playlist was requested. "
                     "Halting request...");
+
+        // Consider the event complete.
+        return;
+    }
+
+    // Prequesting JS scripts can sometimes cause the browser to get confused,
+    // as a result they need to be blocked until the remain of the page has
+    // been loaded.
+    if (g_str_has_suffix(uri, ".js")) {
+
+        // Tell the end-user this request was halted.
+        print_debug("prerequest() --> A JS script was pre-requested. "
+                    "Delaying request until page load complete.");
+
+        // Consider the event complete.
         return;
     }
 
@@ -158,15 +177,29 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
       || g_str_has_prefix(uri, "file://")
       || g_str_has_prefix(uri, "data:")
       || g_str_has_prefix(uri, "blob:")) {
+
+        // Consider the event complete.
         return;
     }
 
     // Sanity check, make sure every string character element is
     // actually printable ASCII (e.g. not \EOF or the like).
     for (i = 0; i < strlen(uri); i++) {
+
+        // If it's not printable...
         if (!g_ascii_isprint(uri[i])) {
+
+            // Consider the event complete.
             return;
         }
+    }
+
+    // Quote the request URI to prevent horrible accidents.
+    quoted_uri = g_shell_quote(uri);
+
+    // Sanity check, make sure this returned a value.
+    if (!quoted_uri || strlen(quoted_uri) < 1) {
+        return;
     }
 
     // Send the signal to stop loading in *this* window.
@@ -1494,9 +1527,17 @@ bool load_failed_callback(WebKitWebView *view, WebKitLoadEvent e,
   char *failing_uri, GError *error, Client *c)
 {
     // Debug mode, tell the end-user that a URI load has failed.
-    print_debug("load_failed_callback() --> The following URI has failed to "
-                "load:");
-    print_debug(failing_uri);
+    if (failing_uri && strlen(failing_uri) > 0) {
+        print_debug("load_failed_callback() --> The following URI has failed to "
+                    "load:");
+        print_debug(failing_uri);
+    }
+
+    // Debug mode, dump the given error message.
+    if (error && error->message && strlen(error->message) > 0) {
+        print_debug("load_failed_callback() --> Error message was...");
+        print_debug(error->message);
+    }
 
     // Consider the event complete.
     return true;
@@ -1883,6 +1924,16 @@ Client* newclient(void)
 
     // Whether or not to enable extra functionality for developers.
     webkit_settings_set_enable_developer_extras(settings, true);
+
+    // Debug mode, dump our console messages for debugging purposes.
+    if (debug_mode) {
+        webkit_settings_set_enable_write_console_messages_to_stdout(settings,
+                                                                    true);
+    // Otherwise the end-user does not see any console messages.
+    } else {
+        webkit_settings_set_enable_write_console_messages_to_stdout(settings,
+                                                                    false);
+    }
 
     // Define the default font size used for the browser.
     webkit_settings_set_minimum_font_size(settings, defaultfontsize);
