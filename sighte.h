@@ -71,6 +71,7 @@ typedef struct Client {
 
     // Essential WebKit objects.
     WebKitWebView *view;
+    WebKitWebContext *web_context;
     WebKitWebInspector *inspector;
     WebKitHitTestResult *hit_test_result;
 

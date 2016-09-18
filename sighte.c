@@ -1787,6 +1787,49 @@ Client* newclient(void)
         return NULL;
     }
 
+    // Attempt to grab the default web context, which is useful for handling
+    // the security and content interactions of a given web page.
+    c->web_context = webkit_web_view_get_context(c->view);
+
+    // Sanity check, make sure this got a new WebKitView object.
+    if (!c->web_context) {
+        return NULL;
+    }
+
+    // Set the default TLS policy of the web context.
+    webkit_web_context_set_tls_errors_policy(c->web_context,
+                                             WEBKIT_TLS_ERRORS_POLICY_IGNORE);
+
+    // If disk caching is disabled, set the web browser cache policy to
+    // prevent caching onto the disk.
+    //
+    // If a given computer has 8+ gigs of RAM and / or a SSD,
+    // there is likely no need to cache to disk. Ergo, forcing the browser
+    // into "document viewer" mode is complete safe and has no performance
+    // consequences in those situations.
+    //
+    if (!enablediskcache) {
+        webkit_web_context_set_cache_model(c->web_context,
+                                           WEBKIT_CACHE_MODEL_DOCUMENT_VIEWER);
+    }
+
+    // Safety check, determine if the default OS settings attempt to
+    // enforce multi-threaded mode.
+    //
+    // On certain Linux distros, or with certain home directory overrides,
+    // it is possible to force WebKit to do all sorts of crazy things, such
+    // as needless multi-threading. Ergo, any browser using WebKit needs to
+    // to check for this beforehand.
+    //
+    if (webkit_web_context_get_process_model(c->web_context)
+      == WEBKIT_PROCESS_MODEL_MULTIPLE_SECONDARY_PROCESSES) {
+
+        // Since the browser has started in multi-threaded mode, then force
+        // it into single thread mode.
+        webkit_web_context_set_process_model(c->web_context,
+          WEBKIT_PROCESS_MODEL_SHARED_SECONDARY_PROCESS);
+    }
+
     // In the event the page we have directed to has a new title, we need
     // to assign the proper callback to change it.
     g_signal_connect(G_OBJECT(c->view),
