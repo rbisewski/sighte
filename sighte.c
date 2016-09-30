@@ -1734,6 +1734,10 @@ Client* newclient(void)
     WebKitSettings *settings;
     GdkGeometry hints = { 1, 1 };
 
+    // Localization "en_US" is almost everpresent on most *nix distros,
+    // so it is a safe default choice.
+    const char * const languages[] = {"en_US", "\0"};
+
     // Assign some memory for our new Client object.
     if (!(c = calloc(1, sizeof(Client)))) {
         terminate("Cannot malloc sufficient space for client object!\n");
@@ -1829,6 +1833,12 @@ Client* newclient(void)
         webkit_web_context_set_process_model(c->web_context,
           WEBKIT_PROCESS_MODEL_SHARED_SECONDARY_PROCESS);
     }
+
+    // Usually WebKit is smart enough, but sometimes there is a need to force
+    // enable browser spell checking.
+    webkit_web_context_set_spell_checking_languages(c->web_context,
+      (const char * const *) &languages);
+    webkit_web_context_set_spell_checking_enabled(c->web_context, true);
 
     // In the event the page we have directed to has a new title, we need
     // to assign the proper callback to change it.
