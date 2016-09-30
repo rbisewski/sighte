@@ -1990,6 +1990,19 @@ Client* newclient(void)
     webkit_settings_set_enable_spatial_navigation(settings,
       enablespatialbrowsing);
 
+    // If 2D accelerated, disable this so that smaller, or embedded, or
+    // less used devices with non-standard GPUs can use this browser.
+    if (webkit_settings_get_enable_accelerated_2d_canvas(settings)) {
+        webkit_settings_set_enable_accelerated_2d_canvas(settings, false);
+    }
+
+    // Some websites engage in embedding frames-inside-of-frames. WebKit has
+    // the ability to flatten them so they behave, when scrolling, as one big
+    // frame. If for some reason it is not enabled, go ahead and turn it on.
+    if (!webkit_settings_get_enable_frame_flattening(settings)) {
+        webkit_settings_set_enable_frame_flattening(settings, true);
+    }
+
     // Whether or not to enable extra functionality for developers.
     webkit_settings_set_enable_developer_extras(settings, true);
 
