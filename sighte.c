@@ -1736,7 +1736,7 @@ Client* newclient(void)
 
     // Localization "en_US" is almost everpresent on most *nix distros,
     // so it is a safe default choice.
-    const char * const languages[] = {"en_US", "\0"};
+    const char * const languages_to_spellcheck[] = {"en_US", "\0"};
 
     // Assign some memory for our new Client object.
     if (!(c = calloc(1, sizeof(Client)))) {
@@ -1834,11 +1834,26 @@ Client* newclient(void)
           WEBKIT_PROCESS_MODEL_SHARED_SECONDARY_PROCESS);
     }
 
+    // Provide the client with the necessary language support.
+    //
+    // Note that this only needs to occur once, since WebKit tends to
+    // globalize it. Doing this too many times causes leaks and possibly
+    // segfaults since WebKit malloc's but doesn't free this variable.
+    //
+    if (!webkit_web_context_get_spell_checking_languages(c->web_context)) {
+        webkit_web_context_set_spell_checking_languages(c->web_context,
+          (const char * const *) &languages_to_spellcheck);
+    }
+
     // Usually WebKit is smart enough, but sometimes there is a need to force
     // enable browser spell checking.
-    webkit_web_context_set_spell_checking_languages(c->web_context,
-      (const char * const *) &languages);
-    webkit_web_context_set_spell_checking_enabled(c->web_context, true);
+    //
+    // Note this only needs to occur once since the browser only spawns a
+    // single, global WebContext instance.
+    //
+    if (!webkit_web_context_get_spell_checking_enabled(c->web_context)) {
+        webkit_web_context_set_spell_checking_enabled(c->web_context, true);
+    }
 
     // In the event the page we have directed to has a new title, we need
     // to assign the proper callback to change it.
