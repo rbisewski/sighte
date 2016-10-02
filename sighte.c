@@ -1736,6 +1736,7 @@ Client* newclient(void)
 
     // Localization "en_US" is almost everpresent on most *nix distros,
     // so it is a safe default choice.
+    const char * const languages_to_accept[] = {"en_US", "\0"};
     const char * const languages_to_spellcheck[] = {"en_US", "\0"};
 
     // Assign some memory for our new Client object.
@@ -1834,13 +1835,21 @@ Client* newclient(void)
           WEBKIT_PROCESS_MODEL_SHARED_SECONDARY_PROCESS);
     }
 
-    // Provide the client with the necessary language support.
+    // Provide the client with the necessary preferred language, as per the
+    // WebKitContext process header "Accept-Language" attribute.
+    webkit_web_context_set_preferred_languages(c->web_context,
+      (const char * const *) &languages_to_accept);
+
+    // Provide the client with the necessary spellcheck language support.
     //
     // Note that this only needs to occur once, since WebKit tends to
     // globalize it. Doing this too many times causes leaks and possibly
     // segfaults since WebKit malloc's but doesn't free this variable.
     //
     if (!webkit_web_context_get_spell_checking_languages(c->web_context)) {
+        print_debug("newclient() --> No spellcheck languages detected, "
+                    "using default:");
+        print_debug(languages_to_spellcheck[0]);
         webkit_web_context_set_spell_checking_languages(c->web_context,
           (const char * const *) &languages_to_spellcheck);
     }
@@ -1851,7 +1860,10 @@ Client* newclient(void)
     // Note this only needs to occur once since the browser only spawns a
     // single, global WebContext instance.
     //
+    print_debug("newclient() --> Determining if spellcheck is enabled or "
+                "disabled...");
     if (!webkit_web_context_get_spell_checking_enabled(c->web_context)) {
+        print_debug("newclient() --> Forcing spellcheck to be enabled.");
         webkit_web_context_set_spell_checking_enabled(c->web_context, true);
     }
 

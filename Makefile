@@ -15,14 +15,9 @@ GTKINC = -pthread \
          -I${USR_INC}/cairo \
          -I${USR_INC}/pango-1.0 \
          -I${USR_INC}/atk-1.0 \
-         -I${USR_INC}/pixman-1 \
-         -I${USR_INC}/libpng12 \
          -I${USR_INC}/gdk-pixbuf-2.0 \
-         -I${USR_INC}/libpng12 \
-         -I${USR_INC}/harfbuzz \
          -I${USR_INC}/freetype2 \
          -I${USR_INC}/libsoup-2.4 \
-         -I${USR_INC}/libxml2 \
          -I${USR_INC}/glib-2.0 \
          -I${USR_LIB}/glib-2.0/include
 
