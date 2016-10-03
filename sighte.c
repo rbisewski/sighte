@@ -669,8 +669,6 @@ char cookiepolicy_set(const SoupCookieJarAcceptPolicy ep)
  * @param   Client   current client 
  *
  * @return  none
- *
- * TODO: consider adding some kind of check for the exception value.
  */
 void runscript(Client *c)
 {  
@@ -683,13 +681,25 @@ void runscript(Client *c)
     char *script = NULL;
     JSValueRef js_exception = NULL;
 
-    // Attempt to grab our file contents, and dump it to script.
-    if (!g_file_get_contents(scriptfile, &script, NULL, NULL)) {
+    // Sanity check, make sure this has a user-defined script file to append
+    // various code for certain JS functionality.
+    if (!scriptfile) {
+        print_debug("runscript() --> No base user script file detected.");
         return;
     }
 
-    // If the script ended up being null, go ahead and leave.
+    // Attempt to grab our file contents, and dump it to script.
+    if (!g_file_get_contents(scriptfile, &script, NULL, NULL)) {
+        print_debug("runscript() --> Unable to grab the contents of the "
+                    "following file:");
+        print_debug(scriptfile);
+        return;
+    }
+
+    // Further sanity check, if the script ended up being null, go ahead
+    // and leave this JS handling routine.
     if (!script) {
+        print_debug("runscript() --> JS file is blank. Ignoring...");
         return;
     }
 
@@ -707,6 +717,9 @@ void runscript(Client *c)
 
     // Sanity check, make sure this returned a valid reference.
     if (!js_str_file) {
+        print_debug("runscript() --> Unable to JS stringify the following "
+                    "file:");
+        print_debug(scriptfile);
         free(script);
         return;
     }
@@ -718,6 +731,8 @@ void runscript(Client *c)
 
     // Sanity check, make sure this returned a valid reference.
     if (!js_obj) {
+        print_debug("runscript() --> Unable to grab primary JS global "
+                    "context.");
         free(script);
         return;
     }
@@ -728,6 +743,8 @@ void runscript(Client *c)
 
     // Sanity check, make sure this actually got one...
     if (!js_view_global) {
+        print_debug("runscript() --> Unable to grab secondary JS global "
+                    "context.");
         free(script);
         return;
     }
@@ -736,6 +753,7 @@ void runscript(Client *c)
     // potentially cause all sorts of pain to the end-user.
     if (!JSCheckScriptSyntax(js_view_global, js_str, js_str_file, 0,
       &js_exception)) {
+        print_debug("runscript() --> Invalid JS syntax detected.");
         free(script);
         return;
     }
@@ -1977,8 +1995,7 @@ Client* newclient(void)
       GDK_ALL_EVENTS_MASK);
  
     // Evaluate our frame using the scripts.js file in our cache.
-    // TODO: this is broken, so I have disabled it for now... 
-    //runscript(c);
+    runscript(c);
 
     // Grab the list of WebKit settings.
     settings = webkit_web_view_get_settings(c->view);
