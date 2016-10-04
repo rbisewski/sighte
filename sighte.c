@@ -1754,7 +1754,6 @@ Client* newclient(void)
 
     // Localization "en_US" is almost everpresent on most *nix distros,
     // so it is a safe default choice.
-    const char * const languages_to_accept[] = {"en_US", "\0"};
     const char * const languages_to_spellcheck[] = {"en_US", "\0"};
 
     // Assign some memory for our new Client object.
@@ -1852,11 +1851,6 @@ Client* newclient(void)
         webkit_web_context_set_process_model(c->web_context,
           WEBKIT_PROCESS_MODEL_SHARED_SECONDARY_PROCESS);
     }
-
-    // Provide the client with the necessary preferred language, as per the
-    // WebKitContext process header "Accept-Language" attribute.
-    webkit_web_context_set_preferred_languages(c->web_context,
-      (const char * const *) &languages_to_accept);
 
     // Provide the client with the necessary spellcheck language support.
     //
