@@ -909,6 +909,16 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p, Client *c)
     // headers given.
     if (debug_mode) {
 
+        // If attempting to use the Soup to get the HTTP/S response header,
+        // but it has been set to NULL, then probably something else is going
+        // on here, so return true to continue the signal.
+        if (!smh) {
+            print_debug("determine_if_download() --> Improper or null "
+                        "SoupMessageHeaders present.");
+            print_debug("determine_if_download() --> Terminating callback.");
+            return true;
+        }
+
         // Assign a chunk of memory for the SoupMessageHeadersIter struct.
         iter = (SoupMessageHeadersIter*) calloc(1,
           sizeof(SoupMessageHeadersIter));
