@@ -1789,7 +1789,7 @@ Client* newclient(void)
     gtk_window_set_role(GTK_WINDOW(c->win), "Sighte");
     
     // Set the default size of the new window.
-    gtk_window_set_default_size(GTK_WINDOW(c->win), 800, 600);
+    gtk_window_set_default_size(GTK_WINDOW(c->win), 1024, 680);
 
     // Callback for the "destroy" signal of the GdkWindow
     g_signal_connect(G_OBJECT(c->win),
