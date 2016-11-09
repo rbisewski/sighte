@@ -65,7 +65,7 @@ static bool allowgeolocation      = true;
 #define CURL(d,r) { \
     .v = (char *[]){ "/usr/bin/xterm", "-e", \
          "/usr/bin/curl", "-L", "-J", "-O", "--user-agent", useragent, \
-         "--referer", r, "-b", cookiefile, "-c", cookiefile, d, NULL \
+         "--referer", r, "-b", cookiefile, "-c", cookiefile, "--url", d, NULL \
     } \
 }
 

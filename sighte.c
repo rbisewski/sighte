@@ -1398,8 +1398,27 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
 
+    // If debug, then tell the user that this is attempting to spawn new
+    // process for the download via cURL.
+    print_debug("initdownload() --> WebKit Requested URI:");
+    print_debug((char *)webkit_uri_request_get_uri(r));
+    print_debug("initdownload() --> Client Requested URI:");
+    print_debug(geturi(c));
+
+    // If debug, tell the user that the program cURL arguments are being
+    // defined.
+    print_debug("initdownload() --> Defining cURL arguments...");
+
     // Cast the given URI to an argument.
     arg = (Arg)CURL((char *)webkit_uri_request_get_uri(r), geturi(c));
+
+    // If debug, print out the argument being used.
+    print_debug("initdownload() --> cURL Download Argument:");
+    print_debug(arg.v);
+
+    // If debug, then tell the user that this is attempting to spawn new
+    // process for the download via cURL.
+    print_debug("initdownload() --> Attempting to spawn new process.");
 
     // Fork this process to get wget via WebKit to download the requested file.
     spawn(c, &arg);
