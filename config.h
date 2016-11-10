@@ -39,6 +39,9 @@ static double zoomlevel = 1.0;
 static char *cookiefile     = "~/.sighte/cookies.txt";
 static char *cookiepolicies = "Aa@"; 
 
+// Downloaded files location
+static char *downloads_location = "~/";
+
 // Certificate variables
 static char *cafile       = "/etc/ssl/certs/ca-certificates.crt";
 static bool strictssl     = false; // Use this to accept / refuse untrusted
@@ -59,13 +62,15 @@ static bool allowgeolocation      = true;
 /*!
  * @param    string   URI where the file to download is located.
  * @param    string   referring URI base location.
+ * @param    string   local download directory location.
  *
  * @return   string   commandline arguments to hand-off to a forked process.
  */
-#define CURL(d,r) { \
+#define CURL(d,r,f) { \
     .v = (char *[]){ "/usr/bin/xterm", "-e", \
-         "/usr/bin/curl", "-L", "-J", "-O", "--user-agent", useragent, \
-         "--referer", r, "-b", cookiefile, "-c", cookiefile, "--url", d, NULL \
+         "/usr/bin/curl", "-OLJq", "--user-agent", useragent, \
+         "--referer", r, "-b", cookiefile, "-c", cookiefile, \
+         "--url", d, NULL \
     } \
 }
 

@@ -1391,6 +1391,10 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 {
     // Variable declaration
     Arg arg;
+    char ** arg_list = NULL;
+    int i = 0;
+    char * url_base_filename = NULL;
+    char * download_file_path = NULL;
 
     // Adjust the Xid of our current client window.
     updatewinid(c);
@@ -1401,24 +1405,90 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // If debug, then tell the user that this is attempting to spawn new
     // process for the download via cURL.
     print_debug("initdownload() --> WebKit Requested URI:");
-    print_debug((char *)webkit_uri_request_get_uri(r));
+    print_debug(webkit_uri_request_get_uri(r));
     print_debug("initdownload() --> Client Requested URI:");
     print_debug(geturi(c));
+
+    // Sanity check, make sure the requsted URL WebKit requested is not blank.
+    if (!webkit_uri_request_get_uri(r)) {
+        print_debug("initdownload() --> WebKit Requested URI is blank! "
+                    "Terminating download request...");
+        return false;
+    }
+
+    // Attempt to grab the base filename from the WebKit requested URI.
+    // This is done since g_path_get_basename does a 'malloc' and so thus
+    // needs to be freed later.
+    url_base_filename = g_path_get_basename(webkit_uri_request_get_uri(r));
+
+    // Sanity check, make sure this actually got a filename.
+    if (!url_base_filename) {
+        print_debug("initdownload() --> Unable to allocate memory to store "
+                    "base filename of WebKit URI to a string.");
+        print_debug("initdownload() --> Terminating download request.");
+        return false;
+    }
+
+    // Append the static global downloads_location (see config.h) to the
+    // cURL argument for file output.
+    download_file_path = g_build_filename(downloads_location,
+                                          url_base_filename,
+                                          NULL);
+
+    // Sanity check, make sure this actually assembled a path.
+    if (!download_file_path) {
+
+        // If debug, tell the user what happened
+        print_debug("initdownload() --> Unable to allocate memory to "
+                    "build download file path.");
+
+        // Free the url_base_filename string if it exists.
+        if (url_base_filename) {
+            free(url_base_filename);
+        }
+
+        // If debug, tell the user this terminates the download request.
+        print_debug("initdownload() --> Terminating download request...");
+        return false;
+    }
+
+    // Having successfully built the download path, go ahead and free the
+    // url_base_filename string since it is no longer needed.
+    if (url_base_filename) {
+        print_debug("initdownload() --> Freeing url_base_filename string.");
+        free(url_base_filename);
+    }
 
     // If debug, tell the user that the program cURL arguments are being
     // defined.
     print_debug("initdownload() --> Defining cURL arguments...");
 
     // Cast the given URI to an argument.
-    arg = (Arg)CURL((char *)webkit_uri_request_get_uri(r), geturi(c));
+    arg = (Arg)CURL((char *) webkit_uri_request_get_uri(r),
+                    geturi(c),
+                    download_file_path);
 
-    // If debug, print out the argument being used.
-    print_debug("initdownload() --> cURL Download Argument:");
-    print_debug(arg.v);
+    // If debug mode, get ready to dump all of the cURL arguments to the
+    // stdout for the purpose of examining them.
+    if (debug_mode) {
 
-    // If debug, then tell the user that this is attempting to spawn new
-    // process for the download via cURL.
-    print_debug("initdownload() --> Attempting to spawn new process.");
+        // If debug, print out the argument being used.
+        print_debug("initdownload() --> cURL Download Argument:");
+        arg_list = (char**) arg.v;
+        for (i = 0; arg_list[i]; i++) {
+            print_debug(arg_list[i]);
+        }
+
+        // If debug, then tell the user that this is attempting to spawn new
+        // process for the download via cURL.
+        print_debug("initdownload() --> Attempting to spawn new process.");
+    }
+
+    // Blast the download file path away.
+    if (download_file_path) {
+        print_debug("initdownload() --> Freeing download_file_path string.");
+        free(download_file_path);
+    }
 
     // Fork this process to get wget via WebKit to download the requested file.
     spawn(c, &arg);
@@ -2400,6 +2470,7 @@ void setup(void)
     XMapWindow(dpy, win);
 
     // Assemble the paths needed to make basic browser functionality work.
+    downloads_location = buildpath(downloads_location);
     cookiefile = buildfile(cookiefile);
     scriptfile = buildfile(scriptfile);
     cachefolder = buildpath(cachefolder);
@@ -2543,18 +2614,29 @@ void spawn(Client *c, const Arg *arg)
     //       not entirely sure. 
     //
     if (fork() != 0) {
+        print_debug("spawn() --> fork() has returned a non-zero value here. "
+                    "So the original process has *probably* passed through "
+                    "here intact.");
         return;
     }
 
+    // If debug, tell the end-user that the process has been successfully
+    // forked since subprocesses will return 0.
+    print_debug("spawn() --> fork() has returned a zero value here. So "
+                "a new process has been generated here.");
+
     // If we have a pre-existing display open, then close it.
     if (dpy) {
+        print_debug("spawn() --> Closing window-manager display.");
         close(ConnectionNumber(dpy));
     }
 
-    // Set the sid
+    // Set the sid.
+    print_debug("spawn() --> Setting sid value.");
     setsid();
 
     // Attempt to execute our given arguments.
+    print_debug("spawn() --> Executing...");
     execvp(((char **)arg->v)[0], (char **)arg->v);
 
     // If this process is still hanging on, then probably we should inform
