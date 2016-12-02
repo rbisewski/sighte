@@ -224,11 +224,16 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     spawn(c, &arg);
 }
 
-//! Assemble file path as a string
+//! Assemble file path as a string, and create it with permission 0600 if
+//! it currently doesn't exist.
+//!
+//! SIDE EFFECT: After calling this function, consider freeing it any
+//!              string it generates since g_build_filename() does a calloc
+//!              to assign the required memory.
 /*!
- * @param   string  original file path
+ * @param     string    original file path
  *
- * @return  string  POSIX file path location
+ * @return    string    POSIX file path location
  */
 char* buildfile(const char *path)
 {
@@ -238,7 +243,7 @@ char* buildfile(const char *path)
     }
 
     // Variable declaration
-    char *fpath;
+    char *fpath = NULL;
     FILE *f;
 
     // Assemble our filepath string.  
@@ -280,7 +285,7 @@ char* buildfile(const char *path)
 char* buildpath(const char *path)
 {
     // Input validation
-    if (!path) {
+    if (!path || strlen(path) < 1) {
         return NULL;
     }
 
@@ -295,8 +300,20 @@ char* buildpath(const char *path)
     // for this by adjusting based on the username, which we from our
     // password file.
     if (path[0] == '~' && (path[1] == '/' || path[1] == '\0')) {
+
+        // Grab the path after ~
         p = (char *)&path[1];
+
+        // Attempt to grab the password file user id data.
         pw = getpwuid(getuid());
+
+        // Sanity check, make sure this is actually a real user who has valid creds.
+        if (!pw || !pw->pw_dir) {
+            terminate("Insufficient permissions to build the following "
+                      "directory location: %s\n", path);
+        }
+
+        // Go ahead and build the pathu using the above pieces.
         tmp_path = g_build_filename(pw->pw_dir, p, NULL);
 
     // For all other cases of the ~ location... 
@@ -305,11 +322,11 @@ char* buildpath(const char *path)
         // Take into account any errant '/' characters, as POSIX says they
         // are completely valid, hence this logic.
         if ((p = strchr(path, '/'))) {
-            name = g_strndup(&path[1], --p - path);
+            name = strndup(&path[1], --p - path);
 
         // Otherwise our string is clean, so just do a straight dump.
         } else {
-            name = g_strdup(&path[1]);
+            name = strdup(&path[1]);
         }
 
         // Sanity check, make sure we actually got a username.
@@ -328,15 +345,21 @@ char* buildpath(const char *path)
 
         // Attempt to assemble our path.
         tmp_path = g_build_filename(pw->pw_dir, p, NULL);
- 
-    // Otherwise simply copy into our temp variable.
-    } else {
-        tmp_path = g_strdup(path);
+    }
+
+    // Otherwise this function was given a non ~ path, so simply copy into
+    // our temp variable.
+    if (!tmp_path) {
+        tmp_path = strdup(path);
     }
 
     // If our directory doesn't exist, then we have to make the intended
     // location, since we will likely need to store cookies / scripts for
     // modern webpages.
+    //
+    // g_mkdir_with_parents returns 0 if the dir was created or pre-exists,
+    // and will return a -1 if an error occurs.
+    //
     if (g_mkdir_with_parents(tmp_path, 0700) < 0) {
         terminate("Could not access directory: %s\n", tmp_path);
     }
@@ -369,6 +392,11 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
     unsigned int i = 0;
     unsigned int context = 0;
     Arg arg;
+
+    // Sanity check, make sure that this event actually got an event hit.
+    if (!c->hit_test_result) {
+        return false;
+    }
 
     // Attempt to grab the context from current hit test of the client.
     context = webkit_hit_test_result_get_context(c->hit_test_result);
