@@ -138,6 +138,20 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
                 "It requested the following URI:");
     print_debug(uri);
 
+    // If this browser was given an HTTP request for a .ico file, then
+    // no need to waste time handling it specially since the browser
+    // does not currently render them due to the current minimalist GUI.
+    if (g_str_has_suffix(uri, ".ico")) {
+
+        // Tell the end-user this request was halted.
+        print_debug("prerequest() --> An icon was pre-requested. "
+                    "Delaying request until page load complete.");
+
+        // Consider the event complete.
+        return;
+    }
+
+
     // Attempt to crush the silly use of m3u8 playlists that can mangle
     // certain video calls.
     if (g_str_has_suffix(uri, ".m3u8")) {
@@ -161,12 +175,6 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
         // Consider the event complete.
         return;
-    }
-
-    // Certain calls seem to be to favicon objects, in which case, probably
-    // the best way to handle this is to assume blank content.
-    if (g_str_has_suffix(uri, "/favicon.ico")) {
-        webkit_uri_request_set_uri(req, "about:blank");
     }
 
     // Sanity check, if we got a normal URI or intranet request, we can
@@ -1221,6 +1229,23 @@ void find(Client *c, const Arg *arg)
 
     // Sanity check, make sure this actually returned a finder.
     if (!wfc) {
+
+        // Debug mode, tell the programmer that th
+        print_debug("find() --> Invalid or recently closed WebKitView "
+                    "window. Doing nothing...");
+
+        // Return whence this came.
+        return;
+    }
+
+    // Further sanity check, make sure that the end-user actually defined
+    // a piece of text to search for.
+    if (!c || !c->text_to_search_for || !strlen(c->text_to_search_for)) {
+
+        // Debug mode, tell the programmer that th
+        print_debug("find() --> Invalid or empty text search string.");
+
+        // Go back.
         return;
     }
 
