@@ -2171,10 +2171,18 @@ Client* newclient(void)
     webkit_settings_set_enable_spatial_navigation(settings,
       enablespatialbrowsing);
 
-    // If 2D accelerated, disable this so that smaller, or embedded, or
-    // less used devices with non-standard GPUs can use this browser.
-    if (webkit_settings_get_enable_accelerated_2d_canvas(settings)) {
+    // If embedded-device mode is enabled, go ahead and disable the
+    // hardware-acceleration features.
+    if (embedded_device_mode) {
+        webkit_settings_set_enable_webgl(settings, false);
         webkit_settings_set_enable_accelerated_2d_canvas(settings, false);
+    }
+
+    // Otherwise if embedded-device mode is disabled, go ahead and enable all
+    // of the hardware-acceleration features.
+    if (!embedded_device_mode) {
+        webkit_settings_set_enable_webgl(settings, true);
+        webkit_settings_set_enable_accelerated_2d_canvas(settings, true);
     }
 
     // Some websites engage in embedding frames-inside-of-frames. WebKit has

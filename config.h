@@ -26,6 +26,10 @@ static char *cachefolder      = "~/.sighte/cache/";
 // Start the browser in a normal, non-fullscreen fashion.
 static bool runinfullscreen = false;
 
+// Embedded device mode, which disables hardware-accelerated 2D/3D features
+// for slow or power-constrained boards.
+static bool embedded_device_mode = false;
+
 // Zoom related variables
 static unsigned int defaultfontsize = 12; 
 static double zoomlevel = 1.0;
