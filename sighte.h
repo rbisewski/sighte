@@ -708,14 +708,6 @@ void togglestyle(Client*, const Arg*);
  */
 void updatetitle(Client*);
 
-//! Update the Xwindow ID 
-/*!
- * @param    Client   current client
- *
- * @return   none
- */
-void updatewinid(Client*);
-
 //! Print out our usage information. 
 /*!
  *  @return  none

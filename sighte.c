@@ -13,7 +13,6 @@ static Display *dpy;
 static Window win;
 static Client *clients = NULL;
 static bool showxid = FALSE;
-static char winid[64];
 static bool usingproxy = 0;
 static GTlsDatabase *tlsdb;
 static int policysel = 0;
@@ -203,12 +202,19 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     }
 
     // Quote the request URI to prevent horrible accidents.
+    print_debug("prerequest() --> Preparing to quote the requested URI.");
     quoted_uri = g_shell_quote(uri);
 
     // Sanity check, make sure this returned a value.
     if (!quoted_uri || strlen(quoted_uri) < 1) {
+        print_debug("prerequest() --> Unable to quote the requested URI!");
         return;
     }
+
+    // If debug mode, show the end-user what the quoted URI looks like
+    // from a string point-of-view.
+    print_debug("prerequest() --> The quoted URI is as follows:");
+    print_debug(quoted_uri);
 
     // Send the signal to stop loading in *this* window.
     webkit_web_view_stop_loading(w);
@@ -834,7 +840,7 @@ void clipboard(Client *c, const Arg *arg)
  * @param   string*   pointer to a string
  * @param   string    original content
  *  
- * @return  
+ * @return  string*   same as **dest
  */
 char* assign_to_str(char **dest, const char *src)
 {
@@ -1449,9 +1455,6 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     char * url_base_filename = NULL;
     char * download_file_path = NULL;
 
-    // Adjust the Xid of our current client window.
-    updatewinid(c);
-
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
 
@@ -1597,9 +1600,6 @@ bool keypress(GtkAccelGroup *group, GObject *obj, unsigned int key,
 
     // Lower 'em
     key = gdk_keyval_to_lower(key);
-
-    // Update 'em
-    updatewinid(c);
 
     // Cycle thru the list of keys
     for (i = 0; i < LENGTH(keys); i++) {
@@ -3129,24 +3129,6 @@ void updatetitle(Client *c)
     free(t);
 
     // Is it set? It is safe?
-    return;
-}
-
-//! Update the Xwindow ID 
-/*!
- * @param    Client   current client
- *
- * @return   none
- */
-void updatewinid(Client *c)
-{
-    // Grab the new desired ID and dump it into our xid property.
-    snprintf(winid, 
-             LENGTH(winid),
-             "%u",
-             (int)GDK_WINDOW_XID(gtk_widget_get_window(GTK_WIDGET(c->win))));
-
-    // Here an xid, gone tomorrow.
     return;
 }
 
