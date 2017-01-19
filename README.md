@@ -12,15 +12,17 @@ team at surf.suckless.org, which they implemented in Webkit1 and GTK2,
 using dmenu as a way to interact with X11. This project borrows from their
 original design and parts of their code base. However, the code is rather
 different and relies on GTK3 and glibc for various functionality instead
-of the suckless libraries / binaries.
+of the suckless libraries / binaries. Almost all of it was altered
+dramatically during the transition to Wekbit2 and GTK3+ which are *quite*
+a bit different.
 
-Parts of it are still broken from the transition to Wekbit2 and GTK3+ which
-are *quite* a bit different. It is not recommended to use this browser as a
-replacement for a more mainstream browser (e.g. Firefox / Chrome) at this
-time.
+In theory, you could use this browser as a replacement for a more mainstream
+browser (e.g. Firefox / Chrome) at this time. However, certain threaded
+performance aspects are lacking, since some non-HTTPS sites (esp. non-standard
+wikis) tend to just dump dozens or even hundreds of GET requests or the like.
 
-Perhaps one day it will be completed, but for now it is still fairly usable
-even in its current form.
+Perhaps one day additional performance features will be added, but for now
+it is still fairly usable even in its current form.
 
 
 # Requirements

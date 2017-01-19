@@ -9,11 +9,15 @@ static bool debug_mode  = false;
 
 // User agent of browser.
 static char *useragent  = "Mozilla/5.0 (X11; U; Unix; en-US) "
-                          "AppleWebKit/537.15 (KHTML, like Gecko) "
-                          "Chrome/55.0.2883.87 Safari/537.15 Sighte/"VERSION;
+                          "AppleWebKit/602.3.12 (KHTML, like Gecko) "
+                          "Chrome/55.0.2883.87 Safari/602.3.12 Sighte/"VERSION;
 
 // Default page title
 static const char *default_page_title = "sighte Browser";
+
+// Default starting size
+static const int browser_window_starting_height = 1280;
+static const int browser_window_starting_width  = 768;
 
 // Default home page.
 static const char *default_home_page = "https://start.duckduckgo.com";
