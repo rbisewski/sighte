@@ -3,7 +3,7 @@ VERSION = 17.2
 
 # Path Locations
 USR_INC   = /usr/include
-USR_LIB   = /usr/lib/x86_64-linux-gnu
+USR_LIB   = /usr/lib/
 PREFIX    = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
