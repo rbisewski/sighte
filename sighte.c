@@ -1927,8 +1927,7 @@ Client* newclient(void)
     }
 
     // Define the window class and role, in this case use the program name.
-    //gtk_window_set_wmclass(GTK_WINDOW(c->win), "sighte", "Sighte");
-    //gtk_window_set_title(GTK_WINDOW(c->win), "sighte");
+    gtk_window_set_title(GTK_WINDOW(c->win), "sighte");
     gtk_window_set_role(GTK_WINDOW(c->win), "Sighte");
     
     // Set the default size of the new window.

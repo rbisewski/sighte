@@ -3,7 +3,7 @@ VERSION = 17.2
 
 # Path Locations
 USR_INC   = /usr/include
-USR_LIB   = /usr/lib/
+USR_LIB   = /usr/lib
 PREFIX    = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
@@ -16,7 +16,6 @@ GTKINC = -pthread \
          -I${USR_INC}/pango-1.0 \
          -I${USR_INC}/atk-1.0 \
          -I${USR_INC}/gdk-pixbuf-2.0 \
-         -I${USR_INC}/freetype2 \
          -I${USR_INC}/libsoup-2.4 \
          -I${USR_INC}/glib-2.0 \
          -I${USR_LIB}/glib-2.0/include
@@ -25,19 +24,11 @@ GTKINC = -pthread \
 GTKLIB = -lwebkit2gtk-4.0 \
          -lgtk-3 \
          -lgdk-3 \
-         -lpangocairo-1.0 \
-         -latk-1.0 \
-         -lcairo \
-         -lgdk_pixbuf-2.0 \
-         -lpangoft2-1.0 \
-         -lpango-1.0 \
-         -lfontconfig \
-         -lfreetype \
-         -lsoup-2.4 \
-         -lgio-2.0 \
-         -lgobject-2.0 \
          -ljavascriptcoregtk-4.0 \
-         -lglib-2.0
+         -lgio-2.0 \
+         -lglib-2.0 \
+         -lgobject-2.0 \
+         -lsoup-2.4
 
 # Other includes
 INCS = -I. -I/usr/include ${GTKINC}
@@ -55,7 +46,7 @@ CFLAGS = -std=c99 \
          -D_DEFAULT_SOURCE
 
 # Compiler
-CC = cc
+CC = cc -s
 
 # Headers
 HDR = sighte.h
