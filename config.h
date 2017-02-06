@@ -66,22 +66,6 @@ static bool enablestyle           = true;
 static bool loadimages            = true;
 static bool allowgeolocation      = true;
 
-//! Macro to handle downloads via xterm+curl.
-/*!
- * @param    string   URI where the file to download is located.
- * @param    string   referring URI base location.
- * @param    string   local download directory location.
- *
- * @return   string   commandline arguments to hand-off to a forked process.
- */
-#define CURL(d,r,f) { \
-    .v = (char *[]){ "/usr/bin/xterm", "-e", \
-         "/usr/bin/curl", "-OLJq", "--user-agent", useragent, \
-         "--referer", r, "-b", cookiefile, "-c", cookiefile, \
-         "--url", d, NULL \
-    } \
-}
-
 // List of styles to be stored into the given filename.
 //
 // Note: the functions using these array look for the first match and then

@@ -1450,10 +1450,10 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 {
     // Variable declaration
     Arg arg;
-    char ** arg_list = NULL;
+    char **arg_list = NULL;
     int i = 0;
-    char * url_base_filename = NULL;
-    char * download_file_path = NULL;
+    char *url_base_filename  = NULL;
+    char *download_file_path = NULL;
 
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
@@ -1520,9 +1520,19 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     print_debug("initdownload() --> Defining cURL arguments...");
 
     // Cast the given URI to an argument.
-    arg = (Arg)CURL((char *) webkit_uri_request_get_uri(r),
-                    geturi(c),
-                    download_file_path);
+    arg.v = (char*[]){"/usr/bin/curl",
+                      "-OLJq",
+                      "--user-agent",
+                      useragent,
+                      "--referer",
+                      geturi(c),
+                      "-b",
+                      cookiefile,
+                      "-c",
+                      cookiefile,
+                      "--url",
+                      (char*) webkit_uri_request_get_uri(r),
+                      NULL};
 
     // If debug mode, get ready to dump all of the cURL arguments to the
     // stdout for the purpose of examining them.
