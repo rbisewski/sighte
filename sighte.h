@@ -510,11 +510,10 @@ Client* newclient(void);
 /*
  * @param    Client   current client
  * @param    Arg      given arguments
- * @param    bool     whether or not to embed this window
  *
  * @return   none
  */
-void newwindow(Client*, const Arg*, bool);
+void newwindow(Client*, const Arg*);
 
 //! Load the context menu after a left-click on the browser window.
 /*!
@@ -577,15 +576,6 @@ void progresschange(WebKitWebView*, GParamSpec*, Client*);
  * @return   none
  */
 void linkopen(Client*, const Arg*);
-
-//! Open a new link in a new tab
-/*!
- * @param    Client   current client
- * @param    Arg      given arguments
- *
- * @return   none
- */
-void linkopenembed(Client*, const Arg*);
 
 //! Reload the current page
 /*!

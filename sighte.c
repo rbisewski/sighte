@@ -1100,7 +1100,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
 
     // Pass along the chain of arguments to the newly generated window.
     print_debug("decidepolicy() --> Generating new browser window...");
-    newwindow(c, NULL, 0);
+    newwindow(c, NULL);
 
     // With the signal handled as intended, send the complete flag back.
     return true;
@@ -1126,9 +1126,21 @@ void destroyclient(Client *c)
     Client *p;
 
     // Send the stop loading signal to the page, for obvious reasons as
-    // there is no need to 
+    // there is no need to continue at that point.
     webkit_web_view_stop_loading(c->view);
-    
+
+    // Check if a pre-existing download location label is open.
+    if (c->download_location_label) {
+
+        // Hide the download location label.
+        gtk_widget_hide(c->download_location_label);
+
+        // Since it is using memory, it needs to be freed.
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+        print_debug("destroyclient() --> Cleaned up download label.");
+    }
+
     // Check if a pre-existing dialog window is open.
     if (c->dialog) {
    
@@ -2384,7 +2396,7 @@ Client* newclient(void)
  *
  * @return   none
  */
-void newwindow(Client *c, const Arg *arg, bool noembed)
+void newwindow(Client *c, const Arg *arg)
 {
     // Variable declaration
     unsigned int i = 0;
@@ -2571,20 +2583,7 @@ void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
 void linkopen(Client *c, const Arg *arg)
 {
     print_debug("linkopen() --> Attempting to open new window...");
-    newwindow(c, arg, 1);
-}
-
-//! Open a new link in a new tab
-/*!
- * @param    Client   current client
- * @param    Arg      given arguments
- *
- * @return   none
- */
-void linkopenembed(Client *c, const Arg *arg)
-{
-    print_debug("linkopenembed() --> Attempting to open new window...");
-    newwindow(c, arg, 0);
+    newwindow(c, arg);
 }
 
 //! Reload the current page
@@ -2866,10 +2865,6 @@ void opendialog(Client *c, const Arg *arg)
     // Set the default activation mechanism via the "Enter" key.
     gtk_entry_set_activates_default(GTK_ENTRY(input_box), true);
 
-    // Grab the flags to set this as a modal, and have it be destroyed
-    // alongside its parent object.
-    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
-
     // Sanity check, make sure this function was given a valid argument.
     if (!arg || !arg->i
       || (arg->i != DIALOG_ACTION_GO && arg->i != DIALOG_ACTION_FIND)) {
@@ -2890,13 +2885,19 @@ void opendialog(Client *c, const Arg *arg)
     // Initialize the dialog modal for requesting input for an URI.
     if (c->dialog_action == DIALOG_ACTION_GO) {
         c->dialog = gtk_dialog_new_with_buttons("Where would you like to go?",
-          GTK_WINDOW(c->win), flags, NULL, NULL);
+          GTK_WINDOW(c->win),
+          GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+          NULL,
+          NULL);
 
     // Initialize the dialog modal for requesting input for a text search.
     } else if (c->dialog_action == DIALOG_ACTION_FIND) {
         c->dialog = gtk_dialog_new_with_buttons(
-          "What would you like to search for?", GTK_WINDOW(c->win), flags,
-          NULL, NULL);
+          "What would you like to search for?",
+          GTK_WINDOW(c->win),
+          GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+          NULL,
+          NULL);
         c->dialog_action = DIALOG_ACTION_FIND;
     } 
 

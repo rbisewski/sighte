@@ -90,7 +90,10 @@ static SiteStyle styles[] = {
 //
 static Key keys[] = {
 
-    /* Printer Options */    
+    /* Open New Window */
+    { GDK_CONTROL_MASK,                 GDK_KEY_w,             linkopen,            { 0 } },
+
+    /* Refresh Current Page */
     { GDK_CONTROL_MASK|GDK_SHIFT_MASK,  GDK_KEY_r,             reload,              { .b = true } },
     { GDK_CONTROL_MASK,                 GDK_KEY_r,             reload,              { .b = false } },
 
@@ -163,9 +166,6 @@ static Key keys[] = {
 //
 static Button buttons[] = {
     /* Click        Event mask             Button  Function        Argument */
-    { ClkLink,      0,                     2,      linkopenembed,  { 0 } },
-    { ClkLink,      GDK_CONTROL_MASK,      2,      linkopen,       { 0 } },
-    { ClkLink,      GDK_CONTROL_MASK,      1,      linkopen,       { 0 } },
     { ClkAny,       0,                     8,      navigate,       { .i = -1 } },
     { ClkAny,       0,                     9,      navigate,       { .i = +1 } },
 };
