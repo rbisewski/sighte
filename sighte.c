@@ -1454,6 +1454,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     int i = 0;
     char *url_base_filename  = NULL;
     char *download_file_path = NULL;
+    GtkWidget *box_content   = NULL;
 
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
@@ -1550,7 +1551,107 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         print_debug("initdownload() --> Attempting to spawn new process.");
     }
 
-    // Blast the download file path away.
+    // Memory check, if the `c->download_location_label` variable exists and
+    // has been previously defined, clear it away.
+    if (c->download_location_label != NULL) {
+
+        // If debug, tell the developer this program needs to clear memory
+        // in order to make space for the new download location label.
+        print_debug("initdownload() --> Freeing memory used by the "
+                    "following GTK modal object: "
+                    "c->download_location_label.");
+
+        // Since the dialog no longer exists, this needs to clean up the
+        // memory assigned via the previous label generation.
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+        print_debug("initdownload() --> freed c->download_location_label");
+    }
+
+    // If we got this far, then tell the end-user that the download command
+    // accomplished via exec(curl) has been backgrounded. As well, state
+    // the location of where the file is being downloaded to.
+
+    // Attempt to set a GtkEntry to allow the end-user to input an URL.
+    c->download_location_label = gtk_label_new(download_file_path);
+
+    // Sanity check, make sure this actually returned a new input box.
+    if (!c->download_location_label) {
+        print_debug("initdownload() --> Unable to assign memory for the "
+                    "download location label.");
+        return false;
+    }
+
+    // Set the maximum length of the input box to 100 characters.
+    gtk_label_set_width_chars(GTK_LABEL(c->download_location_label), 80);
+
+    // Attempt to set the requested size of the input_box entry widget
+    gtk_widget_set_size_request(c->download_location_label, 680, 30);
+
+    // Generate a new dialog for the download location pop-up, along with
+    // flags to tell the OS this is a model dialog that is autodestroyed
+    // once the parent is closed.
+    c->dialog = gtk_dialog_new_with_buttons("Download queued and sent to "
+      "the following location:",
+      GTK_WINDOW(c->win),
+      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+      NULL,
+      NULL);
+
+    // Sanity check, make sure this actually generated a dialog.
+    if (!c->dialog) {
+
+        // If debug, tell the developer this program failed to assign
+        // memory for the GTK modal dialog.
+        print_debug("initdownload() --> Unable to assign memory for the "
+                    "GTK modal object: c->dialog.");
+
+        // Since the dialog no longer exists, this needs to clean up the
+        // memory assigned via the previous label generation.
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+        print_debug("initdownload() --> freed c->download_location_label");
+
+        // Return false, which continues the callback.
+        return false;
+    }
+
+    // Grab the GtkBox from the content area of the GtkDialog.
+    box_content = gtk_dialog_get_content_area(GTK_DIALOG(c->dialog));
+
+    // Sanity check, make sure this actually was able to find a GtkBox.
+    if (!box_content) {
+
+        // Tell the developer exactly what happened.
+        print_debug("initdownload() --> Unable to access the content area "
+                    "of the GtkDialog object: c->dialog");
+
+        // Clean up any memory assigned to the dialog object, if it still
+        // exists and is defined.
+        if (c->dialog) {
+            gtk_widget_destroy(c->dialog);
+            c->dialog = NULL;
+            print_debug("initdownload() --> freed c->dialog memory");
+        }
+
+        // Since the dialog no longer exists, this needs to clean up the
+        // memory assigned.
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+        print_debug("initdownload() --> freed c->download_location_label");
+
+        // Return false, which continues the callback.
+        return false;
+    }
+
+    // Add the download_location_label to the content area of the dialog.
+    gtk_container_add(GTK_CONTAINER(box_content), c->download_location_label);
+
+    // Since we actually got a valid dialog, go ahead and display it.
+    gtk_widget_show(c->download_location_label);
+    gtk_widget_show(c->dialog);
+
+    // Blast the download file path away since we're done with it.
     if (download_file_path) {
         print_debug("initdownload() --> Freeing download_file_path string.");
         free(download_file_path);

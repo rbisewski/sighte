@@ -67,6 +67,7 @@ typedef struct Client {
     // Interactive on-screen widgets
     GtkWidget *win;
     GtkWidget *pane;
+    GtkWidget *download_location_label;
     GtkWidget *dialog;
 
     // Essential WebKit objects.
