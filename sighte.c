@@ -1521,29 +1521,43 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         return false;
     }
 
-    // Having successfully built the download path, go ahead and free the
-    // url_base_filename string since it is no longer needed.
-    if (url_base_filename) {
-        print_debug("initdownload() --> Freeing url_base_filename string.");
-        free(url_base_filename);
-    }
-
     // If debug, tell the user that the program cURL arguments are being
     // defined.
     print_debug("initdownload() --> Defining cURL arguments...");
 
-    // Cast the given URI to an argument.
-    arg.v = (char*[]){"/usr/bin/curl",
-                      "-OLJq",
+    // Cast the given URI to an argument, which uses aria2c to safely
+    // and rapidly download files from the download request.
+    //
+    // Originally this used curl, with the following arguments:
+    //
+    // arg.v = (char*[]){"/usr/bin/curl",
+    //                   "-OLJq",
+    //                   "--user-agent",
+    //                   useragent,
+    //                   "--referer",
+    //                   geturi(c),
+    //                   "-b",
+    //                   cookiefile,
+    //                   "-c",
+    //                   cookiefile,
+    //                   "--url",
+    //                   (char*) webkit_uri_request_get_uri(r),
+    //                   NULL};
+    //
+    // Lately curl has become a bit too feature-rich for this minimalist
+    // browser, so this has since been replaced with aria2c, which can
+    // safely and securely download files in a lightweight manner.
+    //
+    arg.v = (char*[]){"/usr/bin/aria2c",
+                      "--quiet=true",
+                      "-d",
+                      downloads_location,
+                      "-o",
+                      url_base_filename,
                       "--user-agent",
                       useragent,
                       "--referer",
                       geturi(c),
-                      "-b",
-                      cookiefile,
-                      "-c",
-                      cookiefile,
-                      "--url",
                       (char*) webkit_uri_request_get_uri(r),
                       NULL};
 
@@ -1671,6 +1685,13 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // Fork this process to get wget via WebKit to download the requested file.
     spawn(c, &arg);
+
+    // Having successfully built the download path, go ahead and free the
+    // url_base_filename string since it is no longer needed.
+    if (url_base_filename) {
+        print_debug("initdownload() --> Freeing url_base_filename string.");
+        free(url_base_filename);
+    }
 
     // We need this process to return 0 here.
     return false;
