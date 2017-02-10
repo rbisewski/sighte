@@ -1471,6 +1471,10 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
 
+    // Terminate the Webkit2 download instance, since it is less reliable
+    // than using other commandline tools; wget, curl, aria2, and so on.
+    webkit_download_cancel(o);
+
     // If debug, then tell the user that this is attempting to spawn new
     // process for the download via cURL.
     print_debug("initdownload() --> WebKit Requested URI:");
@@ -1549,7 +1553,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // safely and securely download files in a lightweight manner.
     //
     arg.v = (char*[]){"/usr/bin/aria2c",
-                      "--quiet=true",
+                      (debug_mode) ? "--quiet=false" : "--quiet=true",
                       "-d",
                       downloads_location,
                       "-o",
@@ -1693,8 +1697,9 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         free(url_base_filename);
     }
 
-    // We need this process to return 0 here.
-    return false;
+    // Having queried the download, go ahead and end the callback by
+    // passing a return value of true.
+    return true;
 }
 
 //! Opens / closes the element and script inspector.
