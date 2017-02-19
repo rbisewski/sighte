@@ -211,6 +211,10 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         return;
     }
 
+    // Clear the original uri away since the quoted version of it is
+    // what will be used at this point.
+    free(uri);
+
     // If debug mode, show the end-user what the quoted URI looks like
     // from a string point-of-view.
     print_debug("prerequest() --> The quoted URI is as follows:");
@@ -351,7 +355,7 @@ char* buildpath(const char *path)
         // Attempt to grab the current password directory.
         if (!(pw = getpwnam(name))) {
             free(name);
-            terminate("Can't get user %s home directory: %s.\n", name, path);
+            terminate("Unable to get user %s home directory: %s.\n", name, path);
         }
 
         // Clean away our name memory. 
@@ -1083,6 +1087,8 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
 
     // Sanity check, make sure we got a URI request.
     if (!r) {
+
+        // As no WebKitURIRequest was been detected, return false.
         return false;
     }
 
@@ -1092,7 +1098,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
         print_debug("decidepolicy() --> Policy decision requests the "
                     "following URI:");
         print_debug(webkit_uri_request_get_uri(r));
-        c->linkhover = (char *) webkit_uri_request_get_uri(r);
+        assign_to_str(&c->linkhover, webkit_uri_request_get_uri(r));
     }
 
     // Clean up the memory used by the URI object.
