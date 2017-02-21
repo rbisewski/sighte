@@ -337,7 +337,8 @@ bool decidepolicy(WebKitWebView*, WebKitPolicyDecision *,
 
 //! Destroy any memory and structs associated with a given Client object.
 /*
- * @param   Client   current client
+ * @param   GtkWidget   widget that holds the window object
+ * @param   Client      current client
  *
  * @return  none
  */
