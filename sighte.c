@@ -484,7 +484,7 @@ void cleanup(void)
 
     // Destruct all existing client objects.
     while (clients) {
-        destroyclient(clients);
+        destroyclient(NULL, clients);
     }
 
     // Given a style file? Better take care of the mess.
@@ -1114,11 +1114,12 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
 
 //! Destroy any memory and structs associated with a given Client object.
 /*
- * @param   Client   current client
+ * @param   GtkWidget   widget that holds the window object
+ * @param   Client      current client
  *
  * @return  none
  */
-void destroyclient(Client *c)
+void destroyclient(GtkWidget* w, Client *c)
 {
     // Input validation
     if (!c) {
@@ -1192,27 +1193,6 @@ void destroyclient(Client *c)
     }
 
     // Wreck it good.
-    return;
-}
-
-//! Destroy the window upon being closed.
-/*!
- * @param   GtkWidget   widget that holds the window object
- * @param   Client      current client 
- *
- * @return  none
- */
-void destroywin(GtkWidget* w, Client *c)
-{
-    // Input validation
-    if (!c) {
-        return;
-    }
-
-    // Attempt to destroy the client object
-    destroyclient(c);
-
-    // Destroy the one client...
     return;
 }
 
@@ -2093,7 +2073,7 @@ Client* newclient(void)
     // Callback for the "destroy" signal of the GdkWindow
     g_signal_connect(G_OBJECT(c->win),
                      "destroy",
-                     G_CALLBACK(destroywin), c);
+                     G_CALLBACK(destroyclient), c);
 
     // Callback for the "leave_notify_event" signal of the GdkWindow
     g_signal_connect(G_OBJECT(c->win),

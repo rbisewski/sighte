@@ -341,16 +341,7 @@ bool decidepolicy(WebKitWebView*, WebKitPolicyDecision *,
  *
  * @return  none
  */
-void destroyclient(Client*);
-
-//! Destroy the window upon being closed.
-/*!
- * @param   GtkWidget   widget that holds the window object
- * @param   Client      current client 
- *
- * @return  none
- */
-void destroywin(GtkWidget*, Client*);
+void destroyclient(GtkWidget*, Client*);
 
 //! Terminate the program with a given error message to stderr.
 /*!
