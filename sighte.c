@@ -878,16 +878,39 @@ char* assign_to_str(char **dest, const char *src)
 WebKitWebView* createwindow(WebKitWebView *v, WebKitNavigationAction *nav,
   Client *c)
 {
-    // Start a new client object to hold our window.
-    Client *n = newclient();
-
-    // Sanity check, make sure we actually got a client.
-    if (!n) {
-        terminate("Note: Unable to initialize new client!\n");
+    // Input validation, make sure this has a valid client.
+    if (!c) {
+        return NULL;
     }
 
-    // Return the pointer to the window view of our new client.
-    return n->view;
+    // Variable declaration.
+    WebKitURIRequest* request = NULL;
+    const char* uri           = NULL;
+
+    // If a navigation action was passed along, attempt to grab that URI.
+    if (nav) {
+        request = webkit_navigation_action_get_request(nav);
+    }
+
+    // Sanity check, make sure this actually got a request.
+    if (request) {
+
+        // If so, attempt to grab the pointer to the URI string.
+        uri = webkit_uri_request_get_uri(request);
+    }
+
+    // In the event a URI was given, attempt to use it.
+    if (uri && strlen(uri) > 0) {
+        c->linkhover = assign_to_str(&c->linkhover, uri);
+    }
+
+    // Spawn a new window instance, which should try to utilize the internal
+    // "linkhover" string as a URI to navigate itself to.
+    newwindow(c);
+
+    // Tell WebKit that the window creation action is completed by returning
+    // NULL, which finalized the callback.
+    return NULL;
 }
 
 //! Determine whether or not we can download based on the given MIME.
@@ -1106,7 +1129,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
 
     // Pass along the chain of arguments to the newly generated window.
     print_debug("decidepolicy() --> Generating new browser window...");
-    newwindow(c, NULL);
+    newwindow(c);
 
     // With the signal handled as intended, send the complete flag back.
     return true;
@@ -2403,12 +2426,10 @@ Client* newclient(void)
 //! Opens a new window that uses the settings of the previous window.
 /*
  * @param    Client   current client
- * @param    Arg      given arguments
- * @param    bool     whether or not to embed this window
  *
  * @return   none
  */
-void newwindow(Client *c, const Arg *arg)
+void newwindow(Client *c)
 {
     // Variable declaration
     unsigned int i = 0;
@@ -2594,8 +2615,14 @@ void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
  */
 void linkopen(Client *c, const Arg *arg)
 {
+    // Tell the developer what the program is attempting to do.
     print_debug("linkopen() --> Attempting to open new window...");
-    newwindow(c, arg);
+
+    // Open a new window.
+    newwindow(c);
+
+    // Go back.
+    return;
 }
 
 //! Reload the current page

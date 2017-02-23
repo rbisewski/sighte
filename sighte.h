@@ -501,11 +501,10 @@ Client* newclient(void);
 //! Opens a new window that uses the settings of the previous window.
 /*
  * @param    Client   current client
- * @param    Arg      given arguments
  *
  * @return   none
  */
-void newwindow(Client*, const Arg*);
+void newwindow(Client*);
 
 //! Load the context menu after a left-click on the browser window.
 /*!
