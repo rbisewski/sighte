@@ -60,7 +60,7 @@ void registerkeystroke(Client *c)
     }
 
     // Variable declaration
-    int i = 0;
+    unsigned int i = 0;
     GClosure *closure;
     GtkAccelGroup *group = gtk_accel_group_new();
  
@@ -119,7 +119,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     }
 
     // Variable declaration 
-    int i = 0;
+    unsigned int i = 0;
     
     // Attempt to grab the requested URI (as a string).
     char *uri = (char *) webkit_uri_request_get_uri(req);
@@ -239,7 +239,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     print_debug("prerequest() --> Attempt to spawn a new instance.");
 
     // Fork another instance using the given arguments.
-    spawn(c, &arg);
+    spawn(&arg);
 }
 
 //! Assemble file path as a string, and create it with permission 0600 if
@@ -1295,7 +1295,6 @@ void find(Client *c, const Arg *arg)
 //! Enable / disable fullscreen mode.
 /*!
  * @param    Client   current client
- * @param    Arg      given argument
  *
  * @return   none
  */
@@ -1697,7 +1696,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     }
 
     // Fork this process to get wget via WebKit to download the requested file.
-    spawn(c, &arg);
+    spawn(&arg);
 
     // Having successfully built the download path, go ahead and free the
     // url_base_filename string since it is no longer needed.
@@ -2060,7 +2059,7 @@ Client* newclient(void)
     // Variable declaration
     Client *c;
     WebKitSettings *settings;
-    GdkGeometry hints = { 1, 1 };
+    GdkGeometry hints = {1, 1, -1, -1, -1, -1, 1, 1, 0, 0, 0};
 
     // Localization "en_US" is almost everpresent on most *nix distros,
     // so it is a safe default choice.
@@ -2485,7 +2484,7 @@ void newwindow(Client *c)
     cmd[i++] = NULL;
 
     // Attempt to open the new window.
-    spawn(NULL, &a);
+    spawn(&a);
 }
 
 //! Load the context menu after a left-click on the browser window.
@@ -2812,12 +2811,11 @@ void sigchld()
 
 //! Spawn a child process, useful for new windows or downloads.
 /*!
- * @param   Client   current client
  * @param   Arg      given list of arguments
  *
  * @return  none
  */
-void spawn(Client *c, const Arg *arg)
+void spawn(const Arg *arg)
 {
     // If we failed to fork, or this process is the parent, then go ahead
     // and return.

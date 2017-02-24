@@ -68,12 +68,15 @@ static bool allowgeolocation      = true;
 
 // List of styles to be stored into the given filename.
 //
+// Specifically, they are of the format:
+//
+// { regexp,  filename-in-style-dir,  regex_t }
+//
 // Note: the functions using these array look for the first match and then
 //       stop check the remainder.
 //
 static SiteStyle styles[] = {
-	/* regexp               file in $styledir */
-	{ ".*",                 "default.css" },
+	{ ".*", "default.css" },
 };
 
 // Hot Keys

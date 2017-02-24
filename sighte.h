@@ -365,7 +365,6 @@ void find(Client*, const Arg*);
 //! Enable / disable fullscreen mode.
 /*!
  * @param    Client   current client
- * @param    Arg      given argument
  *
  * @return   none
  */
@@ -591,12 +590,11 @@ void sigchld();
 
 //! Spawn a child process, useful for new windows or downloads.
 /*!
- * @param   Client   current client
  * @param   Arg      given list of arguments
  *
  * @return  none
  */
-void spawn(Client*, const Arg*);
+void spawn(const Arg*);
 
 //! Open / close a browser dialog for undertaking certain actions.
 /*!

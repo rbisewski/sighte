@@ -40,6 +40,7 @@ LIBS = -L/usr/lib -lc -lX11 ${GTKLIB} -lgthread-2.0
 CFLAGS = -std=c99 \
          -O2 \
          -pedantic \
+         -fpic \
          -Wall \
          ${INCS} \
          -DVERSION=\"${VERSION}\" \
