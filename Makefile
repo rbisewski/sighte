@@ -42,6 +42,7 @@ CFLAGS = -std=c99 \
          -pedantic \
          -fpic \
          -Wall \
+         -Wextra \
          ${INCS} \
          -DVERSION=\"${VERSION}\" \
          -D_DEFAULT_SOURCE

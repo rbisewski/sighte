@@ -878,6 +878,9 @@ char* assign_to_str(char **dest, const char *src)
 WebKitWebView* createwindow(WebKitWebView *v, WebKitNavigationAction *nav,
   Client *c)
 {
+    // Silence compiler warnings.
+    (void) v;
+
     // Input validation, make sure this has a valid client.
     if (!c) {
         return NULL;
@@ -917,11 +920,10 @@ WebKitWebView* createwindow(WebKitWebView *v, WebKitNavigationAction *nav,
 /*!
  * @param    WebKitWebView          current window view
  * @param    WebKitPolicyDecision   web policy result
- * @param    Client                 current client
  *
  * @return   bool                   whether or not to allow the download.
  */
-bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p, Client *c)
+bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
 {
     // Input validation
     if (!v || !p) {
@@ -1060,7 +1062,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     if (t == WEBKIT_POLICY_DECISION_TYPE_RESPONSE) {
         print_debug("decidepolicy() --> Policy decision request resembles a "
                     "possible download.");
-        return determine_if_download(view,p,c); 
+        return determine_if_download(view,p);
     } 
 
     // Right now this function only handles navigation via links, so check
@@ -1144,6 +1146,9 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
  */
 void destroyclient(GtkWidget* w, Client *c)
 {
+    // Silence compiler warnings.
+    (void) w;
+
     // Input validation
     if (!c) {
         return;
@@ -1300,6 +1305,9 @@ void find(Client *c, const Arg *arg)
  */
 void fullscreen(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Input validation
     if (!c) {
         return;
@@ -1332,6 +1340,9 @@ void fullscreen(Client *c, const Arg *arg)
 bool geopolicyrequested(WebKitWebView *v,
   WebKitGeolocationPermissionRequest *d, Client *c)
 {
+    // Silence compiler warnings.
+    (void) v;
+
     // Input validation.
     if (!d || !c) {
         return false;
@@ -1386,7 +1397,7 @@ char* geturi(Client *c)
 const char* getstyle(const char *uri)
 {
     // Variable declaration
-    int i = 0;
+    unsigned int i = 0;
 
     // If we have a base style file, return that one.
     if (stylefile != NULL) {
@@ -1468,6 +1479,9 @@ void setstyle(Client *c, const char *style)
  */
 bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 {
+    // Silence compiler warnings.
+    (void) view;
+
     // Variable declaration
     Arg arg;
     char **arg_list = NULL;
@@ -1719,6 +1733,9 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
  */
 void inspector(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Input validation
     if (!c) {
         return;
@@ -1749,6 +1766,10 @@ void inspector(Client *c, const Arg *arg)
 bool keypress(GtkAccelGroup *group, GObject *obj, unsigned int key,
   GdkModifierType mods, Client *c)
 {
+    // Silence compiler warnings.
+    (void) group;
+    (void) obj;
+
     // Variable declaration
     unsigned int i = 0;
 
@@ -1790,6 +1811,10 @@ bool keypress(GtkAccelGroup *group, GObject *obj, unsigned int key,
 void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
   unsigned int modifiers, Client *c)
 {
+    // Silence compiler warnings.
+    (void) v;
+    (void) modifiers;
+
     // Input validation
     if (!hit_test_result || !c) {
         return;
@@ -1853,6 +1878,11 @@ void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
 bool load_failed_callback(WebKitWebView *view, WebKitLoadEvent e,
   char *failing_uri, GError *error, Client *c)
 {
+    // Silence compiler warnings.
+    (void) view;
+    (void) e;
+    (void) c;
+
     // Debug mode, tell the end-user that a URI load has failed.
     if (failing_uri && strlen(failing_uri) > 0) {
         print_debug("load_failed_callback() --> The following URI has failed to "
@@ -1880,6 +1910,10 @@ bool load_failed_callback(WebKitWebView *view, WebKitLoadEvent e,
  */
 void loadstatuschange(WebKitWebView *view, WebKitLoadEvent *e, Client *c)
 {
+    // Silence compiler warnings.
+    (void) view;
+    (void) e;
+
     // Input validation
     if (!c) {
         return;
@@ -2500,6 +2534,13 @@ void newwindow(Client *c)
 bool contextmenu(WebKitWebView *view, WebKitContextMenu *menu,
   WebKitHitTestResult *target, GdkEvent *event, Client *c)
 {
+    // Silence compiler warnings.
+    (void) view;
+    (void) menu;
+    (void) target;
+    (void) event;
+    (void) c;
+
     // Debug mode, tell the end-user that a (custom?) context menu has been
     // requested by a given web service.
     print_debug("contextmenu() --> Context Menu signal detected.");
@@ -2518,6 +2559,9 @@ bool contextmenu(WebKitWebView *view, WebKitContextMenu *menu,
  */
 void pasteuri(GtkClipboard *clipboard, const char *text, gpointer d)
 {
+    // Silence compiler warnings.
+    (void) clipboard;
+
     // Assign the text string to the argument object.
     Arg arg = {.v = text };
 
@@ -2542,6 +2586,9 @@ void pasteuri(GtkClipboard *clipboard, const char *text, gpointer d)
 bool print_callback(WebKitWebView *w, WebKitPrintOperation *print_op,
   const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Input validation.
     if (!w || !print_op) {
         return true;
@@ -2560,6 +2607,9 @@ bool print_callback(WebKitWebView *w, WebKitPrintOperation *print_op,
  */
 void print(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Input validation
     if (!c) {
         return;
@@ -2590,6 +2640,10 @@ void print(Client *c, const Arg *arg)
  */
 void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
 {
+    // Silence compiler warnings.
+    (void) view;
+    (void) pspec;
+
     // Input validation
     if (!c) {
         return;
@@ -2614,6 +2668,9 @@ void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
  */
 void linkopen(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Tell the developer what the program is attempting to do.
     print_debug("linkopen() --> Attempting to open new window...");
 
@@ -2656,7 +2713,7 @@ void reload(Client *c, const Arg *arg)
 void setup(void)
 {
     // Variable declaration
-    int i;
+    unsigned int i = 0;
     char *proxy;
     char *new_proxy;
     char *no_proxy;
@@ -3059,6 +3116,9 @@ bool handle_dialog_keypress(GtkWidget *w, GdkEventKey *e, Client *c)
  */
 void stop(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Give the command to stop loading our page.
     webkit_web_view_stop_loading(c->view);
 
@@ -3076,6 +3136,9 @@ void stop(Client *c, const Arg *arg)
  */
 void titlechange(WebKitWebView *view, GParamSpec *pspec, Client *c)
 {
+    // Silence compiler warnings.
+    (void) pspec;
+
     // Input validation
     if (!view || !c) {
         return;
@@ -3102,6 +3165,10 @@ void titlechange(WebKitWebView *view, GParamSpec *pspec, Client *c)
  */
 void titlechangeleave(void *a, void *b, Client *c)
 {
+    // Silence compiler warnings.
+    (void) a;
+    (void) b;
+
     // Nullify our hover, we don't yet want to navigate there.
     c->linkhover = NULL;
 
@@ -3160,6 +3227,9 @@ void toggle(Client *c, const Arg *arg)
  */
 void togglecookiepolicy(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Input validation
     if (!c) {
         return;
@@ -3187,6 +3257,9 @@ void togglecookiepolicy(Client *c, const Arg *arg)
 
     // This might need to update the client title, so go ahead.
     updatetitle(c);
+
+    // Since this is done, go back.
+    return;
 }
 
 //! Switch geolocation off or on.
@@ -3198,6 +3271,9 @@ void togglecookiepolicy(Client *c, const Arg *arg)
  */
 void togglegeolocation(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Set b to false, we'll use it when we reload.
     Arg a = { .b = FALSE };
 
@@ -3206,6 +3282,9 @@ void togglegeolocation(Client *c, const Arg *arg)
 
     // Reload the current client
     reload(c, &a);
+
+    // Go ahead and return then.
+    return;
 }
 
 //! Toggle CSS styles on or off.
@@ -3217,6 +3296,9 @@ void togglegeolocation(Client *c, const Arg *arg)
  */
 void togglestyle(Client *c, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) arg;
+
     // Switch between style modes.
     enablestyle = !enablestyle;
 
@@ -3303,6 +3385,10 @@ void usage(void)
  */
 bool web_process_crashed_callback(WebKitWebView *v, const Arg *arg)
 {
+    // Silence compiler warnings.
+    (void) v;
+    (void) arg;
+
     // Tell the end-user since this callback has executed that a possible
     // crash has occurred in one or more of the browser's WebKitWebView
     // structures.

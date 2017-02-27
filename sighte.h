@@ -316,11 +316,10 @@ WebKitWebView* createwindow(WebKitWebView*, WebKitNavigationAction*, Client*);
 /*!
  * @param    WebKitWebView          current window view
  * @param    WebKitPolicyDecision   web policy result
- * @param    Client                 current client
  *
  * @return   bool                   whether or not to allow the download.
  */
-bool determine_if_download(WebKitWebView*, WebKitPolicyDecision*, Client*);
+bool determine_if_download(WebKitWebView*, WebKitPolicyDecision*);
 
 //! Determine whether or not to open a new window. 
 /*!
