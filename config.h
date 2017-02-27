@@ -75,9 +75,7 @@ static bool allowgeolocation      = true;
 // Note: the functions using these array look for the first match and then
 //       stop check the remainder.
 //
-static SiteStyle styles[] = {
-	{ ".*", "default.css" },
-};
+static SiteStyle styles[] = {{ ".*", "default.css", 0 }};
 
 // Hot Keys
 //

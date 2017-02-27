@@ -43,6 +43,7 @@ CFLAGS = -std=c99 \
          -fpic \
          -Wall \
          -Wextra \
+         -Wno-missing-braces\
          ${INCS} \
          -DVERSION=\"${VERSION}\" \
          -D_DEFAULT_SOURCE
