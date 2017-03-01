@@ -7,7 +7,7 @@
 #include "sighte.h"
 
 // Global Variables
-char *argv0;
+char*  argv0;
 static SoupSession *default_soup_session;
 static Display *dpy;
 static Window win;
@@ -3572,10 +3572,10 @@ int main(int argc, char *argv[])
                 usage();
             } 
         }
-        USED(_argc);
+        (void) _argc;
     }
-    USED(argv);
-    USED(argc);
+    (void) argv;
+    (void) argc;
 
     // If we got an URI argument, we need to take them into account.
     if (argc > 0) {

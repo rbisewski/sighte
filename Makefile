@@ -39,10 +39,10 @@ LIBS = -L/usr/lib -lc -lX11 ${GTKLIB} -lgthread-2.0
 # Flags
 CFLAGS = -std=c99 \
          -O2 \
-         -pedantic \
          -fpic \
          -Wall \
          -Wextra \
+         -Wpedantic \
          -Wno-missing-braces\
          ${INCS} \
          -DVERSION=\"${VERSION}\" \

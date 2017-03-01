@@ -27,7 +27,6 @@
 #include <JavaScriptCore/JavaScript.h>
 
 // Argument evaluation macros.
-#define USED(x)  ((void)(x))
 #define EARGF(x) ((argv[1] == NULL)? ((x), abort(), (char *)0) :\
 		 (argc--, argv++, argv[0]))
 
