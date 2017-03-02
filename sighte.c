@@ -464,22 +464,24 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
 void cleanup(void)
 {
     // Clean up cached disk files used for Soup.
+    print_debug("cleanup() --> Dumping Soup memory.");
     if (diskcache) {
         soup_cache_flush(diskcache);
         soup_cache_dump(diskcache);
     }
 
     // Destruct all existing client objects.
-    while (clients) {
-        destroyclient(NULL, clients);
-    }
+    print_debug("cleanup() --> Freeing memory assigned to client.");
+    destroyclient(NULL, clients);
 
     // Given a style file? Better take care of the mess.
+    print_debug("cleanup() --> Freeing memory from styles file ref.");
     if (stylefile) {
         free(stylefile);
     }
 
     // Using a cookie file? Clean it up.
+    print_debug("cleanup() --> Freeing memory from cookies file ref.");
     if (cookiefile) {
         free(cookiefile);
     }
@@ -1141,17 +1143,14 @@ void destroyclient(GtkWidget* w, Client *c)
         return;
     }
 
-    // Define a pointer, it'll get used to cycle through our list of
-    // clients objects; this is done of the purpose of wiping away only
-    // the specified present instant (i.e. this window and all of it's
-    // associated content).
-    Client *p;
-
     // Send the stop loading signal to the page, for obvious reasons as
     // there is no need to continue at that point.
+    print_debug("destroyclient() --> Attemptin to halt web view page load...");
     webkit_web_view_stop_loading(c->view);
+    print_debug("destroyclient() --> Halting web view page load.");
 
     // Check if a pre-existing download location label is open.
+    print_debug("destroyclient() --> Attempting to clean download label...");
     if (c->download_location_label) {
 
         // Hide the download location label.
@@ -1164,6 +1163,7 @@ void destroyclient(GtkWidget* w, Client *c)
     }
 
     // Check if a pre-existing dialog window is open.
+    print_debug("destroyclient() --> Attempting to clean GTK dialog...");
     if (c->dialog) {
    
         // Hide the current dialog. 
@@ -1176,36 +1176,32 @@ void destroyclient(GtkWidget* w, Client *c)
     }
 
     // Destroy the window view.
-    gtk_widget_destroy(GTK_WIDGET(c->view));
-    print_debug("destroyclient() --> Cleaned up WebKitView object.");
+    print_debug("destroyclient() --> Attempting to clean WebKitView...");
+    if (c->view) {
+        gtk_widget_destroy(GTK_WIDGET(c->view));
+        print_debug("destroyclient() --> Cleaned up WebKitView object.");
+    }
 
     // Finally, destroy the browser window.
-    gtk_widget_destroy(c->win);
-    print_debug("destroyclient() --> Cleaned up GTK Window object.");
-
-    // Grab the next client in line...
-    for (p = clients; p && p->next != c; p = p->next);
-
-    // If we've gone through all of them and not found the originally
-    // specified client again, then just grab the latest element.
-    if (p) {
-        p->next = c->next;
-
-    // Otherwise reset our global pointer Client array to the next client.
-    } else {
-        clients = c->next;
+    print_debug("destroyclient() --> Attempting to clean GTK Window...");
+    if (c->win) {
+        gtk_widget_destroy(c->win);
+        print_debug("destroyclient() --> Cleaned up GTK Window object.");
     }
 
     // Since we've either found the next client or the end, we can safely
-    // dispose of this client. 
-    free(c);
-    print_debug("destroyclient() --> Freed client object.");
+    // dispose of this client.
+    print_debug("destroyclient() --> Attempting to clean Client...");
+    if (clients) {
+        free(clients);
+        clients = NULL;
+        print_debug("destroyclient() --> Freed client object.");
+    }
 
     // Terminate our GTK window instance, if no other clients are running.
-    if (clients == NULL) {
-        gtk_main_quit();
-        print_debug("destroyclient() --> Terminated GTK loop program.");
-    }
+    print_debug("destroyclient() --> Attempting to leave GTK main...");
+    gtk_main_quit();
+    print_debug("destroyclient() --> Terminated GTK loop program.");
 
     // Wreck it good.
     return;
@@ -2417,7 +2413,6 @@ Client* newclient(void)
     c->text_to_search_for = NULL;
 
     // Add a pointer to this client to the global list of clients.
-    c->next = clients;
     clients = c;
 
     // Grab and return the Xid of this window, if asked.

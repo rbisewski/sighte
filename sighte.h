@@ -86,9 +86,6 @@ typedef struct Client {
 
     // Load progress, as a percentage.
     int progress;
-
-    // Stores a pointer to the next client child.
-    struct Client *next;
     
     // Stores the latest dialog action.
     int dialog_action;
