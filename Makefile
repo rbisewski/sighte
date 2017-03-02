@@ -1,5 +1,5 @@
 # Version
-VERSION = 17.2
+VERSION = 17.3
 
 # Path Locations
 USR_INC   = /usr/include
@@ -38,7 +38,6 @@ LIBS = -L/usr/lib -lc -lX11 ${GTKLIB} -lgthread-2.0
 
 # Flags
 CFLAGS = -std=c99 \
-         -O2 \
          -fpic \
          -Wall \
          -Wextra \

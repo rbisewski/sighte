@@ -12,7 +12,7 @@ static SoupSession *default_soup_session;
 static Display *dpy;
 static Window win;
 static Client *clients = NULL;
-static bool showxid = FALSE;
+static bool showxid = false;
 static bool usingproxy = 0;
 static GTlsDatabase *tlsdb;
 static int policysel = 0;
@@ -158,19 +158,6 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         // Tell the end-user this request was halted.
         print_debug("prerequest() --> A m3u8 playlist was requested. "
                     "Halting request...");
-
-        // Consider the event complete.
-        return;
-    }
-
-    // Prequesting JS scripts can sometimes cause the browser to get confused,
-    // as a result they need to be blocked until the remain of the page has
-    // been loaded.
-    if (g_str_has_suffix(uri, ".js")) {
-
-        // Tell the end-user this request was halted.
-        print_debug("prerequest() --> A JS script was pre-requested. "
-                    "Delaying request until page load complete.");
 
         // Consider the event complete.
         return;
