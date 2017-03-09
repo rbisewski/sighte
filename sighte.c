@@ -150,7 +150,6 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         return;
     }
 
-
     // Attempt to crush the silly use of m3u8 playlists that can mangle
     // certain video calls.
     if (g_str_has_suffix(uri, ".m3u8")) {
@@ -182,6 +181,9 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
         // If it's not printable...
         if (!g_ascii_isprint(uri[i])) {
+
+            // Tell the developer that an invalid character was detected.
+            print_debug("prerequest() --> Non-ascii URI was detected.");
 
             // Consider the event complete.
             return;
