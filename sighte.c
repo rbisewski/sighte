@@ -162,6 +162,18 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         return;
     }
 
+    // If a request to utilize a chrome extension was given, go ahead and
+    // ignore it since this browser does not utilize the blink engine.
+    if (g_str_has_prefix(uri, "chrome-extension://")) {
+
+        // Tell the end-user this request was halted.
+        print_debug("prerequest() --> A call to a chrome extension was "
+                    "requested. Halting request...");
+
+        // Consider the event complete.
+        return;
+    }
+
     // Sanity check, if we got a normal URI or intranet request, we can
     // simply terminate here.
     if (g_str_has_prefix(uri, "http://")
