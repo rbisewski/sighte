@@ -5,16 +5,20 @@ JavascriptCore evaluation library, and GTK3+ as main GUI.
 
 Originally this had been an experiment designed for research into
 cybernetic and wearable technologies, but at this time it is primarily a
-sort of overly simplistic browser with not much functionality.
+sort of minimalism-inspired browser; no fancy GUI, no tabs, etc.
 
 The code itself is based off of a fork of the surf browser created by the
 team at surf.suckless.org, which they implemented in Webkit1 and GTK2,
-using dmenu as a way to interact with X11. This project borrows from their
-original design and parts of their code base. However, the code is rather
-different and relies on GTK3 and glibc for various functionality instead
-of the suckless libraries / binaries. Almost all of it was altered
-dramatically during the transition to Wekbit2 and GTK3+ which are *quite*
-a bit different.
+using dmenu as a way to interact with X11.
+
+The sighte GUI code is a rewrite that relies on GTK3 and glibc for instead
+of the suckless libraries / binaries. This derives a bit from the suckless
+philosophy, but this browser is still quite lean and minimal when compared
+to other popular choices.
+
+On the backend side, the WebKit engine code has been replaced with newer
+Webkit2 functionality, which required a considerable rewrite of much of the
+original forked code.
 
 In theory, you could use this browser as a replacement for a more mainstream
 browser (e.g. Firefox / Chrome) at this time. However, certain threaded
@@ -30,9 +34,10 @@ it is still fairly usable even in its current form.
 The browser itself was designed around a standard Debian Linux environment,
 wherein the following packages are required:
 
+* glib-2
 * libgtk-3-0
 * libgtk-3-dev
-* glib-2
+* libwebkit2gtk-4.0-37
 * libwebkit2gtk-4.0-dev
 
 For different distros of the Linux, the package names might vary. Feel free

@@ -16,13 +16,28 @@ JavascriptCore evaluation library, and GTK3+ as main GUI.
 
 Originally this had been an experiment designed for research into
 cybernetic and wearable technologies, but at this time it is primarily a
-sort of GUI-limited "productivity" browser to quickly allow the end-user
-to view the webpage in question without distraction.
+sort of minimalism-inspired browser; no fancy GUI, no tabs, etc.
 
 The code itself is based off of a fork of the surf browser created by the
-team at suckless.org, which they implemented in Webkit1 and GTK2, using
-dmenu as a way to interact with X11. This project borrows from their
-original design and parts of their code base.
+team at surf.suckless.org, which they implemented in Webkit1 and GTK2,
+using dmenu as a way to interact with X11.
+
+The sighte GUI code is a rewrite that relies on GTK3 and glibc for instead
+of the suckless libraries / binaries. This derives a bit from the suckless
+philosophy, but this browser is still quite lean and minimal when compared
+to other popular choices.
+
+On the backend side, the WebKit engine code has been replaced with newer
+Webkit2 functionality, which required a considerable rewrite of much of the
+original forked code.
+
+In theory, you could use this browser as a replacement for a more mainstream
+browser (e.g. Firefox / Chrome) at this time. However, certain threaded
+performance aspects are lacking, since some non-HTTPS sites (esp. non-standard
+wikis) tend to just dump dozens or even hundreds of GET requests or the like.
+
+Perhaps one day additional performance features will be added, but for now
+it is still fairly usable even in its current form.
 .SH OPTIONS
 .TP
 .B \-a cookiepolicies

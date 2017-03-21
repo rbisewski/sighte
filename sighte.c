@@ -3551,7 +3551,7 @@ int main(int argc, char *argv[])
             // Version
             case 'v':
                 terminate("sighte-"VERSION", "
-                    "Copyright 2016 sighte browser, all rights reserved.\n");
+                    "Copyright 2017 sighte browser, all rights reserved.\n");
 
             // Show xid
             case 'x':
