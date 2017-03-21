@@ -43,12 +43,23 @@
 #define DIALOG_ACTION_GO   1
 #define DIALOG_ACTION_FIND 2
 
+// Webkit2 versions prior to v2.8 did not allow for context selection
+// clicks to be registered and treated as a Hit-Test, ergo define this
+// as zero which tells these click hits to be ignored.
+#ifndef WEBKIT_HIT_TEST_RESULT_CONTEXT_SELECTION
+    #define ClkSel   0
+
+// Webkit2 version 2.8 or newer registers context selection clicks, so
+// allow this feature if it is available.
+#else
+    #define ClkSel   WEBKIT_HIT_TEST_RESULT_CONTEXT_SELECTION
+#endif
+
 // Define the Webkit click contexts.
 #define ClkDoc   WEBKIT_HIT_TEST_RESULT_CONTEXT_DOCUMENT
 #define ClkLink  WEBKIT_HIT_TEST_RESULT_CONTEXT_LINK
 #define ClkImg   WEBKIT_HIT_TEST_RESULT_CONTEXT_IMAGE
 #define ClkMedia WEBKIT_HIT_TEST_RESULT_CONTEXT_MEDIA
-#define ClkSel   WEBKIT_HIT_TEST_RESULT_CONTEXT_SELECTION
 #define ClkEdit  WEBKIT_HIT_TEST_RESULT_CONTEXT_EDITABLE
 #define ClkAny   ClkDoc | ClkLink | ClkImg | ClkMedia | ClkSel | ClkEdit
 
