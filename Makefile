@@ -3,7 +3,7 @@ VERSION = 17.3
 
 # Path Locations
 USR_INC   = /usr/include
-USR_LIB   = /usr/lib
+GLIB_INC  = `pkg-config --cflags glib-2.0`
 PREFIX    = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
@@ -17,8 +17,7 @@ GTKINC = -pthread \
          -I${USR_INC}/atk-1.0 \
          -I${USR_INC}/gdk-pixbuf-2.0 \
          -I${USR_INC}/libsoup-2.4 \
-         -I${USR_INC}/glib-2.0 \
-         -I${USR_LIB}/glib-2.0/include
+         ${GLIB_INC}
 
 # Webkit and GTK library flags
 GTKLIB = -lwebkit2gtk-4.0 \

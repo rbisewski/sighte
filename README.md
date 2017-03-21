@@ -27,14 +27,20 @@ it is still fairly usable even in its current form.
 
 # Requirements
 
-Specifically, the following packages are required:
+The browser itself was designed around a standard Debian Linux environment,
+wherein the following packages are required:
 
-* gtk-3
+* libgtk-3-0
+* libgtk-3-dev
 * glib-2
-* webkit2-gtk-4
+* libwebkit2gtk-4.0-dev
 
-Recommend examining the Makefile for more details if you are unable to get
-sighte to properly compile.
+For different distros of the Linux, the package names might vary. Feel free
+to contact me if your distro needs other packages and I will make note of it
+in future versions of this readme.
+
+As a final recourse, I recommend examining the Makefile for more details if
+you are unable to get sighte to properly compile.
 
 
 # Installation
