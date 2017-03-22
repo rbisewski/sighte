@@ -28,6 +28,9 @@ wikis) tend to just dump dozens or even hundreds of GET requests or the like.
 Perhaps one day additional performance features will be added, but for now
 it is still fairly usable even in its current form.
 
+Consider reading the *Basic Usage Instructions* at a minimum to get the hang
+of using this browser.
+
 
 # Requirements
 
@@ -50,13 +53,18 @@ you are unable to get sighte to properly compile.
 
 # Installation
 
-Edit the Makefile to adjust the respective Webkit2 / GTK3 requirements to
-their proper places.
+The philosophy of this browser extends towards minimalism, and thus is
+directed at more expert users.
+
+Start by running make to see if it will compile. Obtain any needed packages
+via the package manager of your distro. Edit the Makefile to adjust the
+respective Webkit2 / GTK3 requirements to their proper places.
 
 Afterwards enter the following command to build and install sighte (if
 necessary as root):
 
     make clean install
+
 
 # Running sighte
 
@@ -65,12 +73,27 @@ sighte [-DfFgGiImMpPsSvx] [-a cookiepolicies] [-c cookiefile]
 
 See the manpage for further options.
 
+
+# Basic Usage Instructions
+
+By default, the browser opens to the home page specified in config.h
+
+Ctrl-w opens a new window.
+
+Ctrl-g will navigate the user to given URL.
+
+Ctrl-h returns the user back to the home page.
+
+Ctrl-f allows you to search for text.
+
+Ctrl-/ does the same as the above.
+
+Ctrl-n takes you next find result.
+
+See the man page for more information.
+
+
 # Authors
-
-The original authors of the surf web browser were the suckless.org
-community. For more information, consider contacting them at:
-
-* Website -> surf.suckless.org
 
 This was forked and adapted to Webkit2 by Robert Bisewski at Ibis
 Cybernetics. For more information, contact:
@@ -78,3 +101,8 @@ Cybernetics. For more information, contact:
 * Website -> www.ibiscybernetics.com
 
 * Email -> contact@ibiscybernetics.com
+
+The original authors of the surf web browser were the suckless.org
+community. For more information, consider contacting them at:
+
+* Website -> surf.suckless.org

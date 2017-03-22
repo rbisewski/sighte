@@ -100,10 +100,6 @@ static Key keys[] = {
 
     /* Printer Options */    
     { GDK_CONTROL_MASK|GDK_SHIFT_MASK,  GDK_KEY_p,             print,               { 0 } },
-   
-    /* Copy & Paste to Clipboard */ 
-    { GDK_CONTROL_MASK,                 GDK_KEY_p,             clipboard,           { .b = true } },
-    { GDK_CONTROL_MASK,                 GDK_KEY_y,             clipboard,           { .b = false } },
 
     /* Zoom Out */    
     { GDK_CONTROL_MASK,                 GDK_KEY_z,             zoom,                { .i = -1 } },

@@ -291,15 +291,6 @@ char cookiepolicy_set(const SoupCookieJarAcceptPolicy);
  */
 void runscript(Client*);
 
-//! Controls the internal cut / paste functionality of the browser.
-/*!
- * @param   Client   the current client
- * @param   Arg      given list of arguments
- *
- * @return  none
- */ 
-void clipboard(Client*, const Arg*);
-
 //! Copy a string from source to destination. 
 /*!
  * @param   string*   pointer to a string

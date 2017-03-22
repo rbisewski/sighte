@@ -818,30 +818,6 @@ void runscript(Client *c)
     return;
 }
 
-//! Controls the internal cut / paste functionality of the browser.
-/*!
- * @param   Client   the current client
- * @param   Arg      given list of arguments
- *
- * @return  none
- */ 
-void clipboard(Client *c, const Arg *arg)
-{
-    // If we have a paste, then dump our text into a given field.
-    if (*(bool *)arg) {
-        gtk_clipboard_request_text(gtk_clipboard_get(GDK_SELECTION_PRIMARY),
-          pasteuri, c);
-        return;
-    }
-
-    // Otherwise we are copying text from a given element.
-    gtk_clipboard_set_text(gtk_clipboard_get(GDK_SELECTION_PRIMARY),
-      c->linkhover ? c->linkhover : geturi(c), -1);
-
-    // All is won.
-    return;
-}
-
 //! Copy a string from source to destination. 
 /*!
  * @param   string*   pointer to a string
