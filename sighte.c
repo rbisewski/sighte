@@ -181,6 +181,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
       || g_str_has_prefix(uri, "about:")
       || g_str_has_prefix(uri, "file://")
       || g_str_has_prefix(uri, "data:")
+      || g_str_has_prefix(uri, "mailto:")
       || g_str_has_prefix(uri, "blob:")) {
 
         // Consider the event complete.
