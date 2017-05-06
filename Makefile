@@ -1,5 +1,5 @@
 # Version
-VERSION = 17.4
+VERSION = 17.5
 
 # Path Locations
 USR_INC   = /usr/include
