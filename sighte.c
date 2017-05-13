@@ -150,18 +150,6 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         return;
     }
 
-    // Attempt to crush the silly use of m3u8 playlists that can mangle
-    // certain video calls.
-    if (g_str_has_suffix(uri, ".m3u8")) {
-
-        // Tell the end-user this request was halted.
-        print_debug("prerequest() --> A m3u8 playlist was requested. "
-                    "Halting request...");
-
-        // Consider the event complete.
-        return;
-    }
-
     // If a request to utilize a chrome extension was given, go ahead and
     // ignore it since this browser does not utilize the blink engine.
     if (g_str_has_prefix(uri, "chrome-extension://")) {
