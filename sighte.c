@@ -3405,12 +3405,15 @@ void zoom(Client *c, const Arg *arg)
 int main(int argc, char *argv[])
 {
     // Create a fork, this will end up being the background process for the
-    // sighte that is ran in the foreground.
-    if (fork() != 0) {
-        print_debug("main() --> fork() has returned a non-zero value here. "
-                    "So the original process has *probably* passed through "
-                    "here intact.");
-        return 0;
+    // sighte that is ran in the foreground. Note that in debug mode this
+    // is skipped.
+    if (!debug_mode) {
+        if (fork() != 0) {
+            print_debug("main() --> fork() has returned a non-zero value here. "
+                        "So the original process has *probably* passed through "
+                        "here intact.");
+            return 0;
+        }
     }
 
     // Variable declaration
