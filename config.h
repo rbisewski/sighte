@@ -52,8 +52,8 @@ static char *downloads_location = "~/";
 
 // Certificate variables
 static char *cafile       = "/etc/ssl/certs/ca-certificates.crt";
-static bool strictssl     = false; // Use this to accept / refuse untrusted
-                                   // SSL connections
+static bool strictssl     = true; // Use this to accept / refuse untrusted
+                                  // SSL connections
 static time_t sessiontime = 3600;
 
 // Webkit default features

@@ -1583,7 +1583,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     }
 
     // If we got this far, then tell the end-user that the download command
-    // accomplished via exec(curl) has been backgrounded. As well, state
+    // accomplished via exec(aria2c) has been backgrounded. As well, state
     // the location of where the file is being downloaded to.
 
     // Attempt to set a GtkEntry to allow the end-user to input an URL.
@@ -2350,15 +2350,9 @@ Client* newclient(void)
     // Whether or not to enable extra functionality for developers.
     webkit_settings_set_enable_developer_extras(settings, true);
 
-    // Debug mode, dump our console messages for debugging purposes.
-    if (debug_mode) {
-        webkit_settings_set_enable_write_console_messages_to_stdout(settings,
-                                                                    true);
-    // Otherwise the end-user does not see any console messages.
-    } else {
-        webkit_settings_set_enable_write_console_messages_to_stdout(settings,
-                                                                    false);
-    }
+    // If debug mode, dump our console messages for debugging purposes.
+    webkit_settings_set_enable_write_console_messages_to_stdout(settings,
+      debug_mode);
 
     // Define the default font size used for the browser.
     webkit_settings_set_minimum_font_size(settings, defaultfontsize);
