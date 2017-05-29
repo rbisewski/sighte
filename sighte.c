@@ -3523,6 +3523,7 @@ int main(int argc, char *argv[])
             case 'v':
                 terminate("sighte-"VERSION", "
                     "Copyright 2017 sighte browser, all rights reserved.\n");
+                break;
 
             // Show xid
             case 'x':
