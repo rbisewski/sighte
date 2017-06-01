@@ -1,5 +1,10 @@
 # Version
-VERSION = 17.5
+VERSION = `date +%y.%m`
+
+# If unable to grab the version, default to N/A
+ifndef VERSION
+    VERSION = "n/a"
+endif
 
 # Path Locations
 USR_INC   = /usr/include
@@ -33,7 +38,7 @@ GTKLIB = -lwebkit2gtk-4.0 \
 INCS = -I. -I/usr/include ${GTKINC}
 
 # Other libraries
-LIBS = -L/usr/lib -lc -lX11 ${GTKLIB} -lgthread-2.0
+LIBS = -L/usr/lib -lX11 ${GTKLIB}
 
 # Flags
 CFLAGS = -std=c99 \
