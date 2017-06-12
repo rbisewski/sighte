@@ -1924,34 +1924,23 @@ void loadstatuschange(WebKitWebView *view, WebKitLoadEvent *e, Client *c)
 
 //! Loads the given URI
 /*!
- * @param  Client  the current client
- * @param  Arg     given set of arguments
+ * @param   Client    the current client
+ * @param   string    URI or file location, as a string
  *
  * @return  none
  */
-void loaduri(Client *c, const Arg *arg)
+void loaduri(Client *c, const char *uri)
 {
     // Input validation
-    if (!c || !arg) {
+    if (!c || !uri || strlen(uri) < 1 || strcmp(uri, "") == 0) {
         return;
     }
 
     // Variable declaration
     char *u = NULL;
     char *rp = NULL;
-    const char *uri = (char *)arg->v;
     Arg a = { .b = FALSE };
     struct stat st;
-
-    // Sanity check, make sure this got back a string.
-    if (!uri || !strlen(uri)) {
-        return;
-    }
-
-    // Further sanity checks, make sure we got a valid URI.
-    if (strcmp(uri, "") == 0) {
-        return;
-    }
 
     // If in debug mode, attempt to print out the URI load request string.
     print_debug("loaduri() --> Attempting to load the following URI:");
@@ -2024,8 +2013,7 @@ void navigate(Client *c, const Arg *arg)
 
     // If zero, then the user is requesting the browser go to the home page.
     if (steps == 0) {
-        Arg sub_arg = {.v = default_home_page};
-        loaduri(c, &sub_arg);
+        loaduri(c, default_home_page);
         updatetitle(c);
         return;
     }
@@ -2517,12 +2505,9 @@ void pasteuri(GtkClipboard *clipboard, const char *text, gpointer d)
     // Silence compiler warnings.
     (void) clipboard;
 
-    // Assign the text string to the argument object.
-    Arg arg = {.v = text };
-
     // If there is text, go ahead and attempt to use it.
     if (text != NULL) {
-        loaduri((Client *) d, &arg);
+        loaduri((Client *) d, text);
     }
 
     // Nothing to return.
@@ -3033,10 +3018,10 @@ bool handle_dialog_keypress(GtkWidget *w, GdkEventKey *e, Client *c)
         if (c->dialog_action == DIALOG_ACTION_GO) {
 
             // Dump the URL into an argument so it can be passed back.
-            const Arg a = { .v = (void *) input_box_text };
+            //const Arg a = { .v = (void *) input_box_text };
 
             // Attempt to load the requested URL.
-            loaduri(c,&a);
+            loaduri(c, input_box_text);
 
         // If this is a find dialog action, then we must search for text.
         } else if (c->dialog_action == DIALOG_ACTION_FIND) {
@@ -3411,11 +3396,7 @@ int main(int argc, char *argv[])
     }
 
     // Variable declaration
-    Arg arg;
     Client *c;
-
-    // Assign a chunk of memory for our arguments.
-    memset(&arg, 0, sizeof(arg));
 
     // Check for each of our command line arguments.
     for (argv0 = *argv, argv++, argc--; 
@@ -3545,11 +3526,6 @@ int main(int argc, char *argv[])
     (void) argv;
     (void) argc;
 
-    // If we got an URI argument, we need to take them into account.
-    if (argc > 0) {
-        arg.v = argv[0];
-    }
-
     // Prepare our browser.
     setup();
 
@@ -3564,17 +3540,16 @@ int main(int argc, char *argv[])
     }
 
     // If given an URI argument, go ahead and use it.
-    if (arg.v && strlen(arg.v)) {
+    if (argc > 0 && argv[0] && strlen(argv[0])) {
         print_debug("main() --> The following URL argument was given:");
-        print_debug(arg.v);
-        loaduri(clients, &arg);
+        print_debug(argv[0]);
+        loaduri(clients, (char*) argv[0]);
 
     // Otherwise take the browser to the default home page.
     } else {
         print_debug("main() --> The following URL argument was given:");
         print_debug(default_home_page);
-        arg.v = default_home_page;
-        loaduri(clients, &arg);
+        loaduri(clients, default_home_page);
         updatetitle(c);
     }
 

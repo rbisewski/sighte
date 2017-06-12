@@ -473,12 +473,12 @@ void loadstatuschange(WebKitWebView*, WebKitLoadEvent*, Client*);
 
 //! Loads the given URI
 /*!
- * @param  Client  the current client
- * @param  Arg     given set of arguments
+ * @param   Client    the current client
+ * @param   string    URI or file location, as a string
  *
  * @return  none
  */
-void loaduri(Client*, const Arg*);
+void loaduri(Client*, const char*);
 
 //! Navigate our client to the intended location, whether backwards to the
 //! previous page or forwards to the new page.
