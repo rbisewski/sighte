@@ -4,6 +4,9 @@
  *               easy-to-adjust configuration.
  */
 
+// Where to store cache data for a given browser session
+#define CACHE_DATA_PATH "~/.cache/sighte"
+
 // Variable to control debug mode
 static bool debug_mode  = false;
 
@@ -23,9 +26,9 @@ static const int browser_window_starting_width  = 768;
 static const char *default_home_page = "https://start.duckduckgo.com";
 
 // JS Script variables
-static const char *scriptfile = "~/.sighte/script.js";
-static char *styledir         = "~/.sighte/styles/";
-static char *cachefolder      = "~/.sighte/cache/";
+static const char *scriptfile = CACHE_DATA_PATH"/script.js";
+static char *styledir         = CACHE_DATA_PATH"/styles/";
+static char *cachefolder      = CACHE_DATA_PATH"/cache/";
 
 // Start the browser in a normal, non-fullscreen fashion.
 static bool runinfullscreen = false;
@@ -44,7 +47,7 @@ static double zoomlevel = 1.0;
 // a: accept nothing
 // @: accept all except third party
 //
-static char *cookiefile     = "~/.sighte/cookies.txt";
+static char *cookiefile     = CACHE_DATA_PATH"/cookies.txt";
 static char *cookiepolicies = "Aa@"; 
 
 // Downloaded files location
