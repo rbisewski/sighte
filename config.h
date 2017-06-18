@@ -13,7 +13,7 @@ static bool debug_mode  = false;
 // User agent of browser.
 static char *useragent  = "Mozilla/5.0 (X11; Linux x86_64) "
                           "AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/59.0.3071.86 Safari/537.36 "
+                          "Chrome/59.0.3071.104 Safari/537.36 "
                           "Sighte/"VERSION;
 // Default page title
 static const char *default_page_title = "sighte Browser";
