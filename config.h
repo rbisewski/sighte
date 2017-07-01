@@ -165,7 +165,7 @@ static Key keys[] = {
 // Button Definitions
 //
 static Button buttons[] = {
-    /* Click        Event mask             Button  Function        Argument */
-    { ClkAny,       0,                     8,      navigate,       { .i = -1 } },
-    { ClkAny,       0,                     9,      navigate,       { .i = +1 } },
+    /* Click    Event mask         Button  Function        Argument */
+    { ClkAny,   GDK_BUTTON1_MASK,  8,      navigate,       { .i = -1 } },
+    { ClkAny,   GDK_BUTTON2_MASK,  9,      navigate,       { .i = +1 } },
 };

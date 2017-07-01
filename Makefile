@@ -73,7 +73,7 @@ OBJ = ${SRC:.c=.o}
 .PHONY: all options clean dist install uninstall
 
 
-all: options sighte
+all: clean options sighte
 
 options:
 	@echo sighte build options:
@@ -90,7 +90,7 @@ sighte: ${OBJ}
 	@${CC} -o $@ sighte.o ${LIBS}
 
 clean:
-	@echo cleaning
+	@echo Cleaning away old build...
 	@rm -f sighte sighte.o sighte-${VERSION}.tar.gz
 
 dist: clean
