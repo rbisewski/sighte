@@ -1542,6 +1542,8 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
                       downloads_location,
                       "-o",
                       url_base_filename,
+                      "--stderr=false",
+                      "--noconf=true",
                       "--user-agent",
                       useragent,
                       "--referer",
