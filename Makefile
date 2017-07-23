@@ -52,7 +52,7 @@ CFLAGS = -std=c99 \
          -D_DEFAULT_SOURCE
 
 # Compiler
-CC = cc -s
+CC = cc
 
 # Headers
 HDR = sighte.h
@@ -81,17 +81,15 @@ options:
 	@echo "LIBS    = ${LIBS}"
 	@echo "CC      = ${CC}"
 
-.c.o:
-	@echo CC $<
-	@${CC} -c ${CFLAGS} $<
-
 sighte: ${OBJ}
-	@echo CC -o $@
-	@${CC} -o $@ sighte.o ${LIBS}
+	@${CC} -s ${CFLAGS} -o $@ ${OBJ} ${LIBS}
+
+debug: ${OBJ}
+	@${CC} -g ${CFLAGS} -o $@ ${OBJ} ${LIBS}
 
 clean:
 	@echo Cleaning away old build...
-	@rm -f sighte sighte.o sighte-${VERSION}.tar.gz
+	@rm -f debug sighte sighte.o sighte-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
