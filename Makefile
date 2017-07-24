@@ -73,7 +73,7 @@ OBJ = ${SRC:.c=.o}
 .PHONY: all options clean dist install uninstall
 
 
-all: clean options sighte
+all: clean release
 
 options:
 	@echo sighte build options:
@@ -81,11 +81,13 @@ options:
 	@echo "LIBS    = ${LIBS}"
 	@echo "CC      = ${CC}"
 
-sighte: ${OBJ}
-	@${CC} -s ${CFLAGS} -o $@ ${OBJ} ${LIBS}
+release: options
+	@echo Building $@ version...
+	@${CC} -s ${SRC} ${CFLAGS} -o sighte ${LIBS}
 
-debug: ${OBJ}
-	@${CC} -g ${CFLAGS} -o $@ ${OBJ} ${LIBS}
+debug:  options
+	@echo Building $@ version...
+	@${CC} -g ${SRC} ${CFLAGS} -o sighte ${LIBS}
 
 clean:
 	@echo Cleaning away old build...
