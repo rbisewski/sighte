@@ -6,6 +6,12 @@ ifndef VERSION
     VERSION = "n/a"
 endif
 
+#
+# Variables to handle debug modes
+#
+DEBUG_MODE_OFF = 0
+DEBUG_MODE_ON  = 1
+
 # Path Locations
 USR_INC   = /usr/include
 GLIB_INC  = `pkg-config --cflags glib-2.0`
@@ -77,17 +83,19 @@ all: clean release
 
 options:
 	@echo sighte build options:
-	@echo "CFLAGS  = ${CFLAGS}"
-	@echo "LIBS    = ${LIBS}"
-	@echo "CC      = ${CC}"
+	@echo "CFLAGS     = ${CFLAGS}"
+	@echo "LIBS       = ${LIBS}"
+	@echo "CC         = ${CC}"
 
 release: options
+	@echo "DEBUG_MODE = ${DEBUG_MODE_OFF}"
 	@echo Building $@ version...
-	@${CC} -s ${SRC} ${CFLAGS} -o sighte ${LIBS}
+	@${CC} -s ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_OFF} -o sighte ${LIBS}
 
 debug:  options
+	@echo "DEBUG_MODE = ${DEBUG_MODE_ON}"
 	@echo Building $@ version...
-	@${CC} -g ${SRC} ${CFLAGS} -o sighte ${LIBS}
+	@${CC} -g ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_ON} -o sighte ${LIBS}
 
 clean:
 	@echo Cleaning away old build...

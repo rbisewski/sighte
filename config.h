@@ -8,7 +8,7 @@
 #define CACHE_DATA_PATH "~/.cache/sighte"
 
 // Variable to control debug mode
-static bool debug_mode  = false;
+static bool debug_mode  = DEBUG_MODE;
 
 // User agent of browser.
 static char *useragent  = "Mozilla/5.0 (X11; Linux x86_64) "
