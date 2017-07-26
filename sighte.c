@@ -7,17 +7,17 @@
 #include "sighte.h"
 
 // Global Variables
-char*  argv0;
-static SoupSession *default_soup_session;
-static Display *dpy;
-static Window win;
-static Client *clients = NULL;
-static bool showxid = false;
-static bool usingproxy = 0;
-static GTlsDatabase *tlsdb;
-static int policysel = 0;
-static char *stylefile = NULL;
-static SoupCache *diskcache = NULL;
+char* argv0;
+SoupSession *default_soup_session;
+Display *dpy;
+Window win;
+Client *clients      = NULL;
+bool showxid         = false;
+bool usingproxy      = 0;
+GTlsDatabase *tlsdb  = NULL;
+int policysel        = 0;
+char *stylefile      = NULL;
+SoupCache *diskcache = NULL;
 
 // Attach the configuration file.
 #include "config.h"
@@ -37,8 +37,8 @@ void print_debug(const char* message)
         return;
     }
 
-    // Dump debug message to stdout if debug mode is on.
-    if (debug_mode) {
+    // Dump debug message to stdout if verbose mode is on.
+    if (verbose_mode) {
         printf("%s\n", message);
     }
 

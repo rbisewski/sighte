@@ -9,8 +9,14 @@ endif
 #
 # Variables to handle debug modes
 #
-DEBUG_MODE_OFF = 0
-DEBUG_MODE_ON  = 1
+DEBUG_MODE_OFF   = 0
+DEBUG_MODE_ON    = 1
+
+#
+# Variables to handle verbose debug output messages modes
+#
+VERBOSE_MODE_OFF = 0
+VERBOSE_MODE_ON  = 1
 
 # Path Locations
 USR_INC   = /usr/include
@@ -83,19 +89,30 @@ all: clean release
 
 options:
 	@echo sighte build options:
-	@echo "CFLAGS     = ${CFLAGS}"
-	@echo "LIBS       = ${LIBS}"
-	@echo "CC         = ${CC}"
+	@echo "CFLAGS       = ${CFLAGS}"
+	@echo "LIBS         = ${LIBS}"
+	@echo "CC           = ${CC}"
 
 release: options
-	@echo "DEBUG_MODE = ${DEBUG_MODE_OFF}"
+	@echo "DEBUG_MODE   = ${DEBUG_MODE_OFF}"
+	@echo "VERBOSE_MODE = ${VERBOSE_MODE_OFF}"
 	@echo Building $@ version...
-	@${CC} -s ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_OFF} -o sighte ${LIBS}
+	@${CC} -s ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_OFF} \
+	  -D VERBOSE_MODE=${VERBOSE_MODE_OFF} -o sighte ${LIBS}
+
+staging: options
+	@echo "DEBUG_MODE   = ${DEBUG_MODE_ON}"
+	@echo "VERBOSE_MODE = ${VERBOSE_MODE_OFF}"
+	@echo Building $@ version...
+	@${CC} -g ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_ON} \
+          -D VERBOSE_MODE=${VERBOSE_MODE_OFF} -o sighte ${LIBS}
 
 debug:  options
-	@echo "DEBUG_MODE = ${DEBUG_MODE_ON}"
+	@echo "DEBUG_MODE   = ${DEBUG_MODE_ON}"
+	@echo "VERBOSE_MODE = ${VERBOSE_MODE_ON}"
 	@echo Building $@ version...
-	@${CC} -g ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_ON} -o sighte ${LIBS}
+	@${CC} -g ${SRC} ${CFLAGS} -D DEBUG_MODE=${DEBUG_MODE_ON} \
+          -D VERBOSE_MODE=${VERBOSE_MODE_ON} -o sighte ${LIBS}
 
 clean:
 	@echo Cleaning away old build...
