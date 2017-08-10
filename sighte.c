@@ -252,7 +252,7 @@ char* buildfile(const char *path)
 
     // Variable declaration
     char *fpath = NULL;
-    FILE *f;
+    FILE *f     = NULL;
 
     // Assemble our filepath string.  
     fpath = g_build_filename(buildpath(g_path_get_dirname(path)),
@@ -266,8 +266,10 @@ char* buildfile(const char *path)
     }
 
     // Attempt to open-append our file.
-    if (!(f = fopen(fpath, "a"))) {
-        free(fpath);
+    f = fopen(fpath, "a");
+
+    // safety check, ensure this could actually obtain a file
+    if (!f) {
         terminate("Could not open file: %s\n", fpath);
     }
 
@@ -1358,26 +1360,10 @@ char* geturi(Client *c)
  */
 const char* getstyle(const char *uri)
 {
-    // Variable declaration
-    unsigned int i = 0;
-
-    // If we have a base style file, return that one.
-    if (stylefile != NULL) {
+    // ensure the URI, styles, and stylefile exist before attempting
+    // to use it
+    if (uri && sizeof(styles) > 0 && stylefile) {
         return stylefile;
-    }
-    
-    // For every given style...
-    for (i = 0; i < LENGTH(styles); i++) {
-
-        // Not a regex? Skip it.
-        if (!styles[i].regex) {
-            continue;
-        }
- 
-        // If (re =~ /url/ ) then we have the right style, so return that.
-        if (!regexec(&(styles[i].re), uri, 0, NULL, 0)) {
-            return styles[i].style;
-        }
     }
 
     // As a default, we return the empty string.
@@ -2655,12 +2641,10 @@ void reload(Client *c, const Arg *arg)
 void setup(void)
 {
     // Variable declaration
-    unsigned int i = 0;
     char *proxy;
     char *new_proxy;
     char *no_proxy;
     char **new_no_proxy;
-    char *styledirfile;
     char *stylepath;
     GProxyResolver *pr;
     GError *error = NULL;
@@ -2685,41 +2669,9 @@ void setup(void)
     scriptfile = buildfile(scriptfile);
     cachefolder = buildpath(cachefolder);
 
-    // If no style file is specified...
-    if (stylefile == NULL) {
 
-        // Build the style directory path.
-        styledir = buildpath(styledir);
-
-        // For each style present...
-        for (i = 0; i < LENGTH(styles); i++) {
-
-            // Attempt to compile the regexes.
-            if (regcomp(&(styles[i].re), styles[i].regex,
-                REG_EXTENDED)) {
-                fprintf(stderr,"Couldn't compile regex: %s\n",styles[i].regex);
-                styles[i].regex = NULL;
-            }
-
-            // Append a / to the front of the directory
-            styledirfile = g_strconcat(styledir, "/", styles[i].style, NULL);
-
-            // Append the filename to the front of the directory path.
-            stylepath = buildfile(styledirfile);
-
-            // Since this is a file, have WebKit treat it as such.
-            styles[i].style = g_strconcat("file://", stylepath, NULL);
-
-            // Free up the used memory.
-            free(styledirfile);
-            free(stylepath);
-        }
-
-        // Having build the path, release this string from memory.
-        free(styledir);
-
-    // Otherwise there is a style file, in which case the assemble the path. 
-    } else {
+    // if a custom CSS file was specified, attempt to use it
+    if (styledir != NULL && stylefile != NULL) {
         stylepath = buildfile(stylefile);
         stylefile = g_strconcat("file://", stylepath, NULL);
         g_free(stylepath);

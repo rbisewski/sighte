@@ -27,9 +27,9 @@ static const int browser_window_starting_width  = 768;
 static const char *default_home_page = "https://start.duckduckgo.com";
 
 // JS Script variables
-static const char *scriptfile = CACHE_DATA_PATH"/script.js";
-static char *styledir         = CACHE_DATA_PATH"/styles/";
-static char *cachefolder      = CACHE_DATA_PATH"/cache/";
+static char *scriptfile  = CACHE_DATA_PATH"/script.js";
+static char *styledir    = CACHE_DATA_PATH"/styles/";
+static char *cachefolder = CACHE_DATA_PATH"/cache/";
 
 // Start the browser in a normal, non-fullscreen fashion.
 static bool runinfullscreen = false;
