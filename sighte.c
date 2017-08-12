@@ -1529,7 +1529,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
                       "-o",
                       url_base_filename,
                       "--stderr=false",
-                      "--noconf=true",
+                      "--no-conf=true",
                       "--user-agent",
                       useragent,
                       "--referer",
