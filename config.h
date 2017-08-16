@@ -14,7 +14,7 @@ static bool verbose_mode = VERBOSE_MODE;
 // User agent of browser.
 static char *useragent  = "Mozilla/5.0 (X11; Linux x86_64) "
                           "AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/60.0.3112.90 Safari/537.36 "
+                          "Chrome/60.0.3112.101 Safari/537.36 "
                           "Sighte/"VERSION;
 // Default page title
 static const char *default_page_title = "sighte Browser";
