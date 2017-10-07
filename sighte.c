@@ -1382,7 +1382,11 @@ void setstyle(Client *c, const char *style)
     // Input validation
     if (!c || !style) {
         return;
-    } 
+    }
+
+    // print a debug message mentioning that the code is now attempting to
+    // set the style of the URI page
+    print_debug("setstyle() --> attempting to alloc memory for styles...");
 
     // Attempt to assemble a stylesheet object.
     WebKitUserStyleSheet *stylesheet
@@ -1410,8 +1414,12 @@ void setstyle(Client *c, const char *style)
     webkit_user_content_manager_add_style_sheet(wcm,stylesheet);
 
     // Clean up any remaining memory
-    free(stylesheet);
-    free(wcm);
+    //
+    // TODO: delete this once sufficient testing has determined if this
+    //       currently is working fine without the need to free() here
+    //
+    //free(stylesheet);
+    //free(wcm);
 
     // Gotta go.
     return;
