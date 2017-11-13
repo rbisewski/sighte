@@ -24,25 +24,34 @@ SoupCache *diskcache = NULL;
 
 //! Debug message printing fucntion.
 /*!
- * @param   string   debug message
+ * @param   string   debug message format
+ * @param   ...      debug message content
  *
  * @return  none
  *
  * SIDE EFFECTS: Dumps string message to stdout.
  */
-void print_debug(const char* message)
+void print_debug(const char* format, ...)
 {
     // Input validation
-    if (!message) {
+    if (!format) {
         return;
     }
 
-    // Dump debug message to stdout if verbose mode is on.
-    if (verbose_mode) {
-        printf("%s\n", message);
+    // Leave here if verbose debug messages are not enabled.
+    if (!verbose_mode) {
+        return;
     }
 
-    // Simply leave here.
+    // setup a list of strings
+    va_list arglist;
+
+    // print out the remaining strings to stdout.
+    va_start(arglist, format);
+    vprintf(format, arglist);
+    va_end(arglist);
+
+    // once all the strings have been printed, leave
     return;
 }
 
@@ -95,7 +104,7 @@ void registerkeystroke(Client *c)
 
     // Tell the end user that the closure assignments are complete.
     print_debug("registerkeystroke() --> The client has now been assigned "
-                "the relevant closures.");
+                "the relevant closures.\n");
 
     // Done here...
     return;
@@ -128,14 +137,13 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     // Sanity check, end here if we got a blank string.
     if (strlen(uri) < 1) {
         print_debug("prerequest() --> Invalid or blank URI request. "
-                    "Halting request...");
+                    "Halting request...\n");
         return;
     }
 
     // Debug mode, tell the end-user that a signal was detected.
-    print_debug("prerequest() --> resource-load-started signal detected. "
-                "It requested the following URI:");
-    print_debug(uri);
+    print_debug("%s\n%s\n","prerequest() --> resource-load-started signal"
+                "detected. It requested the following URI:", uri);
 
     // If this browser was given an HTTP request for a .ico file, then
     // no need to waste time handling it specially since the browser
@@ -144,7 +152,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
         // Tell the end-user this request was halted.
         print_debug("prerequest() --> An icon was pre-requested. "
-                    "Delaying request until page load complete.");
+                    "Delaying request until page load complete.\n");
 
         // Consider the event complete.
         return;
@@ -156,7 +164,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
         // Tell the end-user this request was halted.
         print_debug("prerequest() --> A call to a chrome extension was "
-                    "requested. Halting request...");
+                    "requested. Halting request...\n");
 
         // Consider the event complete.
         return;
@@ -184,7 +192,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         if (!g_ascii_isprint(uri[i])) {
 
             // Tell the developer that an invalid character was detected.
-            print_debug("prerequest() --> Non-ascii URI was detected.");
+            print_debug("prerequest() --> Non-ascii URI was detected.\n");
 
             // Consider the event complete.
             return;
@@ -192,12 +200,12 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     }
 
     // Quote the request URI to prevent horrible accidents.
-    print_debug("prerequest() --> Preparing to quote the requested URI.");
+    print_debug("prerequest() --> Preparing to quote the requested URI.\n");
     quoted_uri = g_shell_quote(uri);
 
     // Sanity check, make sure this returned a value.
     if (!quoted_uri || strlen(quoted_uri) < 1) {
-        print_debug("prerequest() --> Unable to quote the requested URI!");
+        print_debug("prerequest() --> Unable to quote the requested URI!\n");
         return;
     }
 
@@ -207,8 +215,8 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
     // If debug mode, show the end-user what the quoted URI looks like
     // from a string point-of-view.
-    print_debug("prerequest() --> The quoted URI is as follows:");
-    print_debug(quoted_uri);
+    print_debug("%s\n%s\n","prerequest() --> The quoted URI is as follows:",
+      quoted_uri);
 
     // Send the signal to stop loading in *this* window.
     webkit_web_view_stop_loading(w);
@@ -226,7 +234,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     }
 
     // Tell the end user that the closure assignments are complete.
-    print_debug("prerequest() --> Attempt to spawn a new instance.");
+    print_debug("prerequest() --> Attempt to spawn a new instance.\n");
 
     // Fork another instance using the given arguments.
     spawn(&arg);
@@ -469,24 +477,24 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
 void cleanup(void)
 {
     // Clean up cached disk files used for Soup.
-    print_debug("cleanup() --> Dumping Soup memory.");
+    print_debug("cleanup() --> Dumping Soup memory.\n");
     if (diskcache) {
         soup_cache_flush(diskcache);
         soup_cache_dump(diskcache);
     }
 
     // Destruct all existing client objects.
-    print_debug("cleanup() --> Freeing memory assigned to client.");
+    print_debug("cleanup() --> Freeing memory assigned to client.\n");
     destroyclient(NULL, clients);
 
     // Given a style file? Better take care of the mess.
-    print_debug("cleanup() --> Freeing memory from styles file ref.");
+    print_debug("cleanup() --> Freeing memory from styles file ref.\n");
     if (stylefile) {
         free(stylefile);
     }
 
     // Using a cookie file? Clean it up.
-    print_debug("cleanup() --> Freeing memory from cookies file ref.");
+    print_debug("cleanup() --> Freeing memory from cookies file ref.\n");
     if (cookiefile) {
         free(cookiefile);
     }
@@ -724,22 +732,21 @@ void runscript(Client *c)
     // Sanity check, make sure this has a user-defined script file to append
     // various code for certain JS functionality.
     if (!scriptfile) {
-        print_debug("runscript() --> No base user script file detected.");
+        print_debug("runscript() --> No base user script file detected.\n");
         return;
     }
 
     // Attempt to grab our file contents, and dump it to script.
     if (!g_file_get_contents(scriptfile, &script, NULL, NULL)) {
-        print_debug("runscript() --> Unable to grab the contents of the "
-                    "following file:");
-        print_debug(scriptfile);
+        print_debug("%s\n%s\n","runscript() --> Unable to grab the "
+                    "contents of the following file:", scriptfile);
         return;
     }
 
     // Further sanity check, if the script ended up being null, go ahead
     // and leave this JS handling routine.
     if (!script) {
-        print_debug("runscript() --> JS file is blank. Ignoring...");
+        print_debug("runscript() --> JS file is blank. Ignoring...\n");
         return;
     }
 
@@ -757,9 +764,8 @@ void runscript(Client *c)
 
     // Sanity check, make sure this returned a valid reference.
     if (!js_str_file) {
-        print_debug("runscript() --> Unable to JS stringify the following "
-                    "file:");
-        print_debug(scriptfile);
+        print_debug("%s\n%s\n","runscript() --> Unable to JS stringify "
+                    "the following file:", scriptfile);
         free(script);
         return;
     }
@@ -772,7 +778,7 @@ void runscript(Client *c)
     // Sanity check, make sure this returned a valid reference.
     if (!js_obj) {
         print_debug("runscript() --> Unable to grab primary JS global "
-                    "context.");
+                    "context.\n");
         free(script);
         return;
     }
@@ -784,7 +790,7 @@ void runscript(Client *c)
     // Sanity check, make sure this actually got one...
     if (!js_view_global) {
         print_debug("runscript() --> Unable to grab secondary JS global "
-                    "context.");
+                    "context.\n");
         free(script);
         return;
     }
@@ -793,7 +799,7 @@ void runscript(Client *c)
     // potentially cause all sorts of pain to the end-user.
     if (!JSCheckScriptSyntax(js_view_global, js_str, js_str_file, 0,
       &js_exception)) {
-        print_debug("runscript() --> Invalid JS syntax detected.");
+        print_debug("runscript() --> Invalid JS syntax detected.\n");
         free(script);
         return;
     }
@@ -923,7 +929,7 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
         // Debug mode, tell the end-user this response gave a blank or
         // invalid MIME-type.
         print_debug("determine_if_download() --> Blank or invalid MIME-type "
-                    "response detected.");
+                    "response detected.\n");
 
         // Consider the callback event complete.
         return true;
@@ -937,7 +943,7 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
         // Debug mode, tell the end-user that this request contains a
         // MIME-type which suggests it is not HTML.
         print_debug("determine_if_download() --> Non-HTML MIME-type "
-                    "request detected.");
+                    "request detected.\n");
 
         // Make a policy decision for download in question.
         webkit_policy_decision_download(p);
@@ -955,8 +961,9 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
         // on here, so return true to continue the signal.
         if (!smh) {
             print_debug("determine_if_download() --> Improper or null "
-                        "SoupMessageHeaders present.");
-            print_debug("determine_if_download() --> Terminating callback.");
+                        "SoupMessageHeaders present.\n"
+                        "determine_if_download() --> Terminating "
+                        "callback.\n");
             return true;
         }
 
@@ -971,19 +978,18 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
         // Sanity check, make sure this could initialize the iterator.
         if (!iter) {
             print_debug("determine_if_download() --> Unable to allocate "
-                        "memory for SoupMessageHeaders iterator structure!");
-            print_debug("determine_if_download() --> Terminating callback.");
+                        "memory for SoupMessageHeaders iterator"
+                        "structure!\n"
+                        "determine_if_download() --> Terminating "
+                        "callback.\n");
             return true;
         }
 
         // With the iterator initialized, attempt to iterate thru this
         // mess-o-headers.
-        print_debug("\n===== HTTP/S Response Headers =====");
+        print_debug("\n===== HTTP/S Response Headers =====\n");
         while (soup_message_headers_iter_next(iter, &name, &value)) {
-            print_debug(name);
-            print_debug("\n");
-            print_debug(value);
-            print_debug("------");
+            print_debug("%s\n%s\n%s\n",name, value, "------");
         }
         print_debug("======== Headers End Here =========\n");
 
@@ -1031,7 +1037,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // download response.
     if (t == WEBKIT_POLICY_DECISION_TYPE_RESPONSE) {
         print_debug("decidepolicy() --> Policy decision request resembles a "
-                    "possible download.");
+                    "possible download.\n");
         return determine_if_download(view,p);
     } 
 
@@ -1042,7 +1048,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
         // Tell the end-user, in debug mode, that this does not appear to be
         // a navigation request.
         print_debug("decidepolicy() --> Policy decision request is not a "
-                    "HTTP/HTTPS navigation response.");
+                    "HTTP/HTTPS navigation response.\n");
 
         // Since it is not, the event is propagated further. The good news is
         // that the rest of the default policy decision handlers for WebKit2
@@ -1058,9 +1064,9 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // propagate this further hoping some other signal handler will get the
     // correct type of policy decision.
     if (!n) {
-        print_debug("decidepolicy() --> Policy decision request is a null"
-                    "HTTP/HTTPS navigation response.");
-        print_debug("decidepolicy() --> Terminating due to null response.");
+        print_debug("%s\n%s\n","decidepolicy() --> Policy decision "
+                    "request is a null HTTP/HTTPS navigation response.",
+                    "decidepolicy() --> Terminating due to null response.");
         return false;
     }
 
@@ -1090,9 +1096,9 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // Grab the URI needed to get to the new page, assuming the client has
     // not yet been destroyed.
     if (c) {
-        print_debug("decidepolicy() --> Policy decision requests the "
-                    "following URI:");
-        print_debug(webkit_uri_request_get_uri(r));
+        print_debug("%s\n%s\n","decidepolicy() --> Policy decision "
+                    "requests the following URI:",
+                    webkit_uri_request_get_uri(r));
         assign_to_str(&c->linkhover, webkit_uri_request_get_uri(r));
     }
 
@@ -1100,7 +1106,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     free(r);
 
     // Pass along the chain of arguments to the newly generated window.
-    print_debug("decidepolicy() --> Generating new browser window...");
+    print_debug("decidepolicy() --> Generating new browser window...\n");
     newwindow(c);
 
     // With the signal handled as intended, send the complete flag back.
@@ -1126,12 +1132,14 @@ void destroyclient(GtkWidget* w, Client *c)
 
     // Send the stop loading signal to the page, for obvious reasons as
     // there is no need to continue at that point.
-    print_debug("destroyclient() --> Attemptin to halt web view page load...");
+    print_debug("destroyclient() --> Attemptin to halt web view page "
+      "load...\n");
     webkit_web_view_stop_loading(c->view);
-    print_debug("destroyclient() --> Halting web view page load.");
+    print_debug("destroyclient() --> Halting web view page load.\n");
 
     // Check if a pre-existing download location label is open.
-    print_debug("destroyclient() --> Attempting to clean download label...");
+    print_debug("destroyclient() --> Attempting to clean download "
+      "label...\n");
     if (c->download_location_label) {
 
         // Hide the download location label.
@@ -1140,11 +1148,11 @@ void destroyclient(GtkWidget* w, Client *c)
         // Since it is using memory, it needs to be freed.
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
-        print_debug("destroyclient() --> Cleaned up download label.");
+        print_debug("destroyclient() --> Cleaned up download label.\n");
     }
 
     // Check if a pre-existing dialog window is open.
-    print_debug("destroyclient() --> Attempting to clean GTK dialog...");
+    print_debug("destroyclient() --> Attempting to clean GTK dialog...\n");
     if (c->dialog) {
    
         // Hide the current dialog. 
@@ -1153,36 +1161,36 @@ void destroyclient(GtkWidget* w, Client *c)
         // Since it is using memory, it needs to be freed.
         gtk_widget_destroy(c->dialog);
         c->dialog = NULL;
-        print_debug("destroyclient() --> Cleaned up dialog box.");
+        print_debug("destroyclient() --> Cleaned up dialog box.\n");
     }
 
     // Destroy the window view.
-    print_debug("destroyclient() --> Attempting to clean WebKitView...");
+    print_debug("destroyclient() --> Attempting to clean WebKitView...\n");
     if (c->view) {
         gtk_widget_destroy(GTK_WIDGET(c->view));
-        print_debug("destroyclient() --> Cleaned up WebKitView object.");
+        print_debug("destroyclient() --> Cleaned up WebKitView object.\n");
     }
 
     // Finally, destroy the browser window.
-    print_debug("destroyclient() --> Attempting to clean GTK Window...");
+    print_debug("destroyclient() --> Attempting to clean GTK Window...\n");
     if (c->win) {
         gtk_widget_destroy(c->win);
-        print_debug("destroyclient() --> Cleaned up GTK Window object.");
+        print_debug("destroyclient() --> Cleaned up GTK Window object.\n");
     }
 
     // Since we've either found the next client or the end, we can safely
     // dispose of this client.
-    print_debug("destroyclient() --> Attempting to clean Client...");
+    print_debug("destroyclient() --> Attempting to clean Client...\n");
     if (clients) {
         free(clients);
         clients = NULL;
-        print_debug("destroyclient() --> Freed client object.");
+        print_debug("destroyclient() --> Freed client object.\n");
     }
 
     // Terminate our GTK window instance, if no other clients are running.
-    print_debug("destroyclient() --> Attempting to leave GTK main...");
+    print_debug("destroyclient() --> Attempting to leave GTK main...\n");
     gtk_main_quit();
-    print_debug("destroyclient() --> Terminated GTK loop program.");
+    print_debug("destroyclient() --> Terminated GTK loop program.\n");
 
     // Wreck it good.
     return;
@@ -1228,7 +1236,7 @@ void find(Client *c, const Arg *arg)
 
         // Debug mode, tell the programmer that th
         print_debug("find() --> Invalid or recently closed WebKitView "
-                    "window. Doing nothing...");
+                    "window. Doing nothing...\n");
 
         // Return whence this came.
         return;
@@ -1239,7 +1247,7 @@ void find(Client *c, const Arg *arg)
     if (!c || !c->text_to_search_for || !strlen(c->text_to_search_for)) {
 
         // Debug mode, tell the programmer that th
-        print_debug("find() --> Invalid or empty text search string.");
+        print_debug("find() --> Invalid or empty text search string.\n");
 
         // Go back.
         return;
@@ -1316,13 +1324,13 @@ bool geopolicyrequested(WebKitWebView *v,
     if (allowgeolocation) {
         webkit_permission_request_allow((WebKitPermissionRequest*) d);
         print_debug("geopolicyrequested() --> Allowed geolocation access "
-                    "request.");
+                    "request.\n");
 
     // Otherwise we do not, and thus must deny.
     } else {
         webkit_permission_request_deny((WebKitPermissionRequest*) d);
         print_debug("geopolicyrequested() --> Denied geolocation access "
-                    "request.");
+                    "request.\n");
     }
 
     // The global awaits.
@@ -1348,7 +1356,7 @@ char* geturi(Client *c)
     }
 
     // Otherwise return the URI as a string.
-    print_debug("geturi() --> Attempting to grab URI.");
+    print_debug("geturi() --> Attempting to grab URI.\n");
     return (char *)webkit_web_view_get_uri(c->view);
 }
 
@@ -1386,7 +1394,7 @@ void setstyle(Client *c, const char *style)
 
     // print a debug message mentioning that the code is now attempting to
     // set the style of the URI page
-    print_debug("setstyle() --> attempting to alloc memory for styles...");
+    print_debug("setstyle() --> attempting to alloc memory for styles...\n");
 
     // Attempt to assemble a stylesheet object.
     WebKitUserStyleSheet *stylesheet
@@ -1455,15 +1463,16 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // If debug, then tell the user that this is attempting to spawn new
     // process for the download via cURL.
-    print_debug("initdownload() --> WebKit Requested URI:");
-    print_debug(webkit_uri_request_get_uri(r));
-    print_debug("initdownload() --> Client Requested URI:");
-    print_debug(geturi(c));
+    print_debug("%s\n%s\n%s\n%s\n",
+                "initdownload() --> WebKit Requested URI:",
+                webkit_uri_request_get_uri(r),
+                "initdownload() --> Client Requested URI:",
+                geturi(c));
 
     // Sanity check, make sure the requsted URL WebKit requested is not blank.
     if (!webkit_uri_request_get_uri(r)) {
         print_debug("initdownload() --> WebKit Requested URI is blank! "
-                    "Terminating download request...");
+                    "Terminating download request...\n");
         return false;
     }
 
@@ -1474,9 +1483,10 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // Sanity check, make sure this actually got a filename.
     if (!url_base_filename) {
-        print_debug("initdownload() --> Unable to allocate memory to store "
-                    "base filename of WebKit URI to a string.");
-        print_debug("initdownload() --> Terminating download request.");
+        print_debug("%s\n%s\n",
+                    "initdownload() --> Unable to allocate memory to store "
+                    "base filename of WebKit URI to a string.",
+                    "initdownload() --> Terminating download request.");
         return false;
     }
 
@@ -1491,7 +1501,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
         // If debug, tell the user what happened
         print_debug("initdownload() --> Unable to allocate memory to "
-                    "build download file path.");
+                    "build download file path.\n");
 
         // Free the url_base_filename string if it exists.
         if (url_base_filename) {
@@ -1499,13 +1509,13 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         }
 
         // If debug, tell the user this terminates the download request.
-        print_debug("initdownload() --> Terminating download request...");
+        print_debug("initdownload() --> Terminating download request...\n");
         return false;
     }
 
     // If debug, tell the user that the program cURL arguments are being
     // defined.
-    print_debug("initdownload() --> Defining cURL arguments...");
+    print_debug("initdownload() --> Defining cURL arguments...\n");
 
     // Cast the given URI to an argument, which uses aria2c to safely
     // and rapidly download files from the download request.
@@ -1550,15 +1560,15 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     if (debug_mode) {
 
         // If debug, print out the argument being used.
-        print_debug("initdownload() --> cURL Download Argument:");
+        print_debug("initdownload() --> cURL Download Argument:\n");
         arg_list = (char**) arg.v;
         for (i = 0; arg_list[i]; i++) {
-            print_debug(arg_list[i]);
+            print_debug("%s\n",arg_list[i]);
         }
 
         // If debug, then tell the user that this is attempting to spawn new
         // process for the download via cURL.
-        print_debug("initdownload() --> Attempting to spawn new process.");
+        print_debug("initdownload() --> Attempting to spawn new process.\n");
     }
 
     // Memory check, if the `c->download_location_label` variable exists and
@@ -1569,13 +1579,13 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         // in order to make space for the new download location label.
         print_debug("initdownload() --> Freeing memory used by the "
                     "following GTK modal object: "
-                    "c->download_location_label.");
+                    "c->download_location_label.\n");
 
         // Since the dialog no longer exists, this needs to clean up the
         // memory assigned via the previous label generation.
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
-        print_debug("initdownload() --> freed c->download_location_label");
+        print_debug("initdownload() --> freed c->download_location_label\n");
     }
 
     // If we got this far, then tell the end-user that the download command
@@ -1588,7 +1598,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // Sanity check, make sure this actually returned a new input box.
     if (!c->download_location_label) {
         print_debug("initdownload() --> Unable to assign memory for the "
-                    "download location label.");
+                    "download location label.\n");
         return false;
     }
 
@@ -1614,13 +1624,13 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         // If debug, tell the developer this program failed to assign
         // memory for the GTK modal dialog.
         print_debug("initdownload() --> Unable to assign memory for the "
-                    "GTK modal object: c->dialog.");
+                    "GTK modal object: c->dialog.\n");
 
         // Since the dialog no longer exists, this needs to clean up the
         // memory assigned via the previous label generation.
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
-        print_debug("initdownload() --> freed c->download_location_label");
+        print_debug("initdownload() --> freed c->download_location_label\n");
 
         // Return false, which continues the callback.
         return false;
@@ -1634,21 +1644,21 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
         // Tell the developer exactly what happened.
         print_debug("initdownload() --> Unable to access the content area "
-                    "of the GtkDialog object: c->dialog");
+                    "of the GtkDialog object: c->dialog\n");
 
         // Clean up any memory assigned to the dialog object, if it still
         // exists and is defined.
         if (c->dialog) {
             gtk_widget_destroy(c->dialog);
             c->dialog = NULL;
-            print_debug("initdownload() --> freed c->dialog memory");
+            print_debug("initdownload() --> freed c->dialog memory\n");
         }
 
         // Since the dialog no longer exists, this needs to clean up the
         // memory assigned.
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
-        print_debug("initdownload() --> freed c->download_location_label");
+        print_debug("initdownload() --> freed c->download_location_label\n");
 
         // Return false, which continues the callback.
         return false;
@@ -1663,7 +1673,8 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // Blast the download file path away since we're done with it.
     if (download_file_path) {
-        print_debug("initdownload() --> Freeing download_file_path string.");
+        print_debug("initdownload() --> Freeing download_file_path "
+          "string.\n");
         free(download_file_path);
     }
 
@@ -1673,7 +1684,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // Having successfully built the download path, go ahead and free the
     // url_base_filename string since it is no longer needed.
     if (url_base_filename) {
-        print_debug("initdownload() --> Freeing url_base_filename string.");
+        print_debug("initdownload() --> Freeing url_base_filename string.\n");
         free(url_base_filename);
     }
 
@@ -1843,15 +1854,16 @@ bool load_failed_callback(WebKitWebView *view, WebKitLoadEvent e,
 
     // Debug mode, tell the end-user that a URI load has failed.
     if (failing_uri && strlen(failing_uri) > 0) {
-        print_debug("load_failed_callback() --> The following URI has failed to "
-                    "load:");
-        print_debug(failing_uri);
+        print_debug("%s\n%s\n",
+                    "load_failed_callback() --> The following URI has "
+                    "failed to load:", failing_uri);
     }
 
     // Debug mode, dump the given error message.
     if (error && error->message && strlen(error->message) > 0) {
-        print_debug("load_failed_callback() --> Error message was...");
-        print_debug(error->message);
+        print_debug("%s\n%s\n",
+          "load_failed_callback() --> Error message was...",
+          error->message);
     }
 
     // Consider the event complete.
@@ -1891,7 +1903,7 @@ void loadstatuschange(WebKitWebView *view, WebKitLoadEvent *e, Client *c)
         }
 
         // All done here.
-        print_debug("loadstatuschange() --> Page load completed.");
+        print_debug("loadstatuschange() --> Page load completed.\n");
         return;
     } 
 
@@ -1939,8 +1951,9 @@ void loaduri(Client *c, const char *uri)
     struct stat st;
 
     // If in debug mode, attempt to print out the URI load request string.
-    print_debug("loaduri() --> Attempting to load the following URI:");
-    print_debug(uri);
+    print_debug("%s\n%s\n",
+                "loaduri() --> Attempting to load the following URI:",
+                 uri);
 
     // Stat our URI string, make sure we weren't accidently given a file
     // path or directory.
@@ -1966,7 +1979,7 @@ void loaduri(Client *c, const char *uri)
 
         // Since we have once again arrived the same location, we can simply
         // reload the page and put an end to the madness.
-        print_debug("loaduri() --> Reloading page...");
+        print_debug("loaduri() --> Reloading page...\n");
         reload(c, &a);
 
         // Since this still have a string laying around, wipe it away since
@@ -2156,9 +2169,9 @@ Client* newclient(void)
     // segfaults since WebKit malloc's but doesn't free this variable.
     //
     if (!webkit_web_context_get_spell_checking_languages(c->web_context)) {
-        print_debug("newclient() --> No spellcheck languages detected, "
-                    "using default:");
-        print_debug(languages_to_spellcheck[0]);
+        print_debug("%s\n%s\n",
+                    "newclient() --> No spellcheck languages detected, "
+                    "using default:", languages_to_spellcheck[0]);
         webkit_web_context_set_spell_checking_languages(c->web_context,
           (const char * const *) &languages_to_spellcheck);
     }
@@ -2170,9 +2183,9 @@ Client* newclient(void)
     // single, global WebContext instance.
     //
     print_debug("newclient() --> Determining if spellcheck is enabled or "
-                "disabled...");
+                "disabled...\n");
     if (!webkit_web_context_get_spell_checking_enabled(c->web_context)) {
-        print_debug("newclient() --> Forcing spellcheck to be enabled.");
+        print_debug("newclient() --> Forcing spellcheck to be enabled.\n");
         webkit_web_context_set_spell_checking_enabled(c->web_context, true);
     }
 
@@ -2448,8 +2461,9 @@ void newwindow(Client *c)
     // If a user clicked on a hyperlink or policy request, give the client
     // that URI as we may need to switch to it.
     if (c && c->linkhover && strlen(c->linkhover)) {
-        print_debug("newwindow() --> Target requested the following URI:");
-        print_debug(c->linkhover);
+        print_debug("%s\n%s\n",
+          "newwindow() --> Target requested the following URI:",
+          c->linkhover);
         cmd[i++] = c->linkhover;
     }
 
@@ -2482,7 +2496,7 @@ bool contextmenu(WebKitWebView *view, WebKitContextMenu *menu,
 
     // Debug mode, tell the end-user that a (custom?) context menu has been
     // requested by a given web service.
-    print_debug("contextmenu() --> Context Menu signal detected.");
+    print_debug("contextmenu() --> Context Menu signal detected.\n");
 
     // Propagate the event further.
     return false;
@@ -2608,7 +2622,7 @@ void linkopen(Client *c, const Arg *arg)
     (void) arg;
 
     // Tell the developer what the program is attempting to do.
-    print_debug("linkopen() --> Attempting to open new window...");
+    print_debug("linkopen() --> Attempting to open new window...\n");
 
     // Open a new window.
     newwindow(c);
@@ -2785,27 +2799,27 @@ void spawn(const Arg *arg)
     if (fork() != 0) {
         print_debug("spawn() --> fork() has returned a non-zero value here. "
                     "So the original process has *probably* passed through "
-                    "here intact.");
+                    "here intact.\n");
         return;
     }
 
     // If debug, tell the end-user that the process has been successfully
     // forked since subprocesses will return 0.
     print_debug("spawn() --> fork() has returned a zero value here. So "
-                "a new process has been generated here.");
+                "a new process has been generated here.\n");
 
     // If we have a pre-existing display open, then close it.
     if (dpy) {
-        print_debug("spawn() --> Closing window-manager display.");
+        print_debug("spawn() --> Closing window-manager display.\n");
         close(ConnectionNumber(dpy));
     }
 
     // Set the sid.
-    print_debug("spawn() --> Setting sid value.");
+    print_debug("spawn() --> Setting sid value.\n");
     setsid();
 
     // Attempt to execute our given arguments.
-    print_debug("spawn() --> Executing...");
+    print_debug("spawn() --> Executing...\n");
     execvp(((char **)arg->v)[0], (char **)arg->v);
 
     // If this process is still hanging on, then probably we should inform
@@ -3224,7 +3238,8 @@ void updatetitle(Client *c)
 {
     // Input validation
     if (!c) {
-        print_debug("updatetitle() --> No client given, so nothing to do...");
+        print_debug("updatetitle() --> No client given, so nothing to "
+          "do...\n");
         return;
     }
 
@@ -3251,7 +3266,7 @@ void updatetitle(Client *c)
     // default for this sort of thing.
     if (!t || !strlen(t)) {
         print_debug("updatetitle() --> Empty or blank title given. Using "
-                    "default browser title...");
+                    "default browser title...\n");
         gtk_window_set_title(GTK_WINDOW(c->win), default_page_title);
         return;
     }
@@ -3294,7 +3309,8 @@ bool web_process_crashed_callback(WebKitWebView *v, const Arg *arg)
     // Tell the end-user since this callback has executed that a possible
     // crash has occurred in one or more of the browser's WebKitWebView
     // structures.
-    print_debug("web_process_crashed() --> Possible WebView crash detected!");
+    print_debug("web_process_crashed() --> Possible WebView crash "
+      "detected!\n");
 
     // Consider the event complete.
     return true;
@@ -3352,7 +3368,7 @@ int main(int argc, char *argv[])
         if (fork() != 0) {
             print_debug("main() --> fork() has returned a non-zero value here. "
                         "So the original process has *probably* passed through "
-                        "here intact.");
+                        "here intact.\n");
             return 0;
         }
     }
@@ -3497,31 +3513,33 @@ int main(int argc, char *argv[])
     // Sanity check, make sure this could actually make a client.
     if (!c) {
         cleanup();
-        print_debug("main() --> Unable to initialize client.");
+        print_debug("main() --> Unable to initialize client.\n");
         return 1;
     }
 
     // If given an URI argument, go ahead and use it.
     if (argc > 0 && argv[0] && strlen(argv[0])) {
-        print_debug("main() --> The following URL argument was given:");
-        print_debug(argv[0]);
+        print_debug("%s\n%s\n",
+          "main() --> The following URL argument was given:",
+          argv[0]);
         loaduri(clients, (char*) argv[0]);
 
     // Otherwise take the browser to the default home page.
     } else {
-        print_debug("main() --> The following URL argument was given:");
-        print_debug(default_home_page);
+        print_debug("%s\n%s\n",
+          "main() --> The following URL argument was given:",
+          default_home_page);
         loaduri(clients, default_home_page);
         updatetitle(c);
     }
 
     // Initialize the main Xwindow for our broswer via GTK+
-    print_debug("main() --> Converging to GTK main loop.");
+    print_debug("main() --> Converging to GTK main loop.\n");
     gtk_main();
 
     // Having finished the task at hand, the above statement should return
     // back here after converging and completed.
-    print_debug("main() --> Deconverged successfully from GTK main loop.");
+    print_debug("main() --> Deconverged successfully from GTK main loop.\n");
 
     // Clean up our globals.
     cleanup();

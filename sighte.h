@@ -149,13 +149,14 @@ typedef struct {
 
 //! Debug message printing fucntion.
 /*!
- * @param   string   debug message
+ * @param   string   debug message format
+ * @param   ...      debug message content
  *
  * @return  none
  *
  * SIDE EFFECTS: Dumps string message to stdout.
  */
-void print_debug(const char*);
+void print_debug(const char*, ...);
 
 //! Group an accel (keystroke) to the intended Client. 
 /*!
