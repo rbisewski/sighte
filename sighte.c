@@ -142,8 +142,8 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     }
 
     // Debug mode, tell the end-user that a signal was detected.
-    print_debug("%s\n%s\n","prerequest() --> resource-load-started signal"
-                "detected. It requested the following URI:", uri);
+    print_debug("prerequest() --> resource-load-started signal"
+      "detected. It requested the following URI: %s\n", uri);
 
     // If this browser was given an HTTP request for a .ico file, then
     // no need to waste time handling it specially since the browser
@@ -215,7 +215,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
     // If debug mode, show the end-user what the quoted URI looks like
     // from a string point-of-view.
-    print_debug("%s\n%s\n","prerequest() --> The quoted URI is as follows:",
+    print_debug("prerequest() --> The quoted URI is as follows: %s\n",
       quoted_uri);
 
     // Send the signal to stop loading in *this* window.
@@ -738,8 +738,8 @@ void runscript(Client *c)
 
     // Attempt to grab our file contents, and dump it to script.
     if (!g_file_get_contents(scriptfile, &script, NULL, NULL)) {
-        print_debug("%s\n%s\n","runscript() --> Unable to grab the "
-                    "contents of the following file:", scriptfile);
+        print_debug("runscript() --> Unable to grab the "
+          "contents of the following file: %s\n", scriptfile);
         return;
     }
 
@@ -764,8 +764,8 @@ void runscript(Client *c)
 
     // Sanity check, make sure this returned a valid reference.
     if (!js_str_file) {
-        print_debug("%s\n%s\n","runscript() --> Unable to JS stringify "
-                    "the following file:", scriptfile);
+        print_debug("runscript() --> Unable to JS stringify "
+          "the following file: %s\n", scriptfile);
         free(script);
         return;
     }
@@ -778,7 +778,7 @@ void runscript(Client *c)
     // Sanity check, make sure this returned a valid reference.
     if (!js_obj) {
         print_debug("runscript() --> Unable to grab primary JS global "
-                    "context.\n");
+          "context.\n");
         free(script);
         return;
     }
@@ -790,7 +790,7 @@ void runscript(Client *c)
     // Sanity check, make sure this actually got one...
     if (!js_view_global) {
         print_debug("runscript() --> Unable to grab secondary JS global "
-                    "context.\n");
+          "context.\n");
         free(script);
         return;
     }
@@ -989,7 +989,7 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
         // mess-o-headers.
         print_debug("\n===== HTTP/S Response Headers =====\n");
         while (soup_message_headers_iter_next(iter, &name, &value)) {
-            print_debug("%s\n%s\n%s\n",name, value, "------");
+            print_debug("%s\n%s\n------\n", name, value);
         }
         print_debug("======== Headers End Here =========\n");
 
@@ -1064,8 +1064,8 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // propagate this further hoping some other signal handler will get the
     // correct type of policy decision.
     if (!n) {
-        print_debug("%s\n%s\n","decidepolicy() --> Policy decision "
-                    "request is a null HTTP/HTTPS navigation response.",
+        print_debug("decidepolicy() --> Policy decision "
+                    "request is a null HTTP/HTTPS navigation response.\n"
                     "decidepolicy() --> Terminating due to null response.");
         return false;
     }
@@ -1096,9 +1096,8 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     // Grab the URI needed to get to the new page, assuming the client has
     // not yet been destroyed.
     if (c) {
-        print_debug("%s\n%s\n","decidepolicy() --> Policy decision "
-                    "requests the following URI:",
-                    webkit_uri_request_get_uri(r));
+        print_debug("decidepolicy() --> Policy decision requests the "
+          "following URI: %s\n", webkit_uri_request_get_uri(r));
         assign_to_str(&c->linkhover, webkit_uri_request_get_uri(r));
     }
 
@@ -1463,10 +1462,9 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // If debug, then tell the user that this is attempting to spawn new
     // process for the download via cURL.
-    print_debug("%s\n%s\n%s\n%s\n",
-                "initdownload() --> WebKit Requested URI:",
+    print_debug("initdownload() --> WebKit Requested URI: %s\n"
+                "initdownload() --> Client Requested URI: %s\n",
                 webkit_uri_request_get_uri(r),
-                "initdownload() --> Client Requested URI:",
                 geturi(c));
 
     // Sanity check, make sure the requsted URL WebKit requested is not blank.
@@ -1483,10 +1481,9 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // Sanity check, make sure this actually got a filename.
     if (!url_base_filename) {
-        print_debug("%s\n%s\n",
-                    "initdownload() --> Unable to allocate memory to store "
-                    "base filename of WebKit URI to a string.",
-                    "initdownload() --> Terminating download request.");
+        print_debug("initdownload() --> Unable to allocate memory to store "
+                    "base filename of WebKit URI to a string.\n"
+                    "initdownload() --> Terminating download request.\n");
         return false;
     }
 
@@ -1854,15 +1851,13 @@ bool load_failed_callback(WebKitWebView *view, WebKitLoadEvent e,
 
     // Debug mode, tell the end-user that a URI load has failed.
     if (failing_uri && strlen(failing_uri) > 0) {
-        print_debug("%s\n%s\n",
-                    "load_failed_callback() --> The following URI has "
-                    "failed to load:", failing_uri);
+        print_debug("load_failed_callback() --> The following URI has "
+                    "failed to load: %s\n", failing_uri);
     }
 
     // Debug mode, dump the given error message.
     if (error && error->message && strlen(error->message) > 0) {
-        print_debug("%s\n%s\n",
-          "load_failed_callback() --> Error message was...",
+        print_debug("load_failed_callback() --> Error message was... %s\n",
           error->message);
     }
 
@@ -1951,9 +1946,8 @@ void loaduri(Client *c, const char *uri)
     struct stat st;
 
     // If in debug mode, attempt to print out the URI load request string.
-    print_debug("%s\n%s\n",
-                "loaduri() --> Attempting to load the following URI:",
-                 uri);
+    print_debug("loaduri() --> Attempting to load the following URI: %s\n",
+      uri);
 
     // Stat our URI string, make sure we weren't accidently given a file
     // path or directory.
@@ -2169,9 +2163,8 @@ Client* newclient(void)
     // segfaults since WebKit malloc's but doesn't free this variable.
     //
     if (!webkit_web_context_get_spell_checking_languages(c->web_context)) {
-        print_debug("%s\n%s\n",
-                    "newclient() --> No spellcheck languages detected, "
-                    "using default:", languages_to_spellcheck[0]);
+        print_debug("newclient() --> No spellcheck languages detected, "
+          "using default: %s\n", languages_to_spellcheck[0]);
         webkit_web_context_set_spell_checking_languages(c->web_context,
           (const char * const *) &languages_to_spellcheck);
     }
@@ -2183,7 +2176,7 @@ Client* newclient(void)
     // single, global WebContext instance.
     //
     print_debug("newclient() --> Determining if spellcheck is enabled or "
-                "disabled...\n");
+      "disabled...\n");
     if (!webkit_web_context_get_spell_checking_enabled(c->web_context)) {
         print_debug("newclient() --> Forcing spellcheck to be enabled.\n");
         webkit_web_context_set_spell_checking_enabled(c->web_context, true);
@@ -2461,9 +2454,8 @@ void newwindow(Client *c)
     // If a user clicked on a hyperlink or policy request, give the client
     // that URI as we may need to switch to it.
     if (c && c->linkhover && strlen(c->linkhover)) {
-        print_debug("%s\n%s\n",
-          "newwindow() --> Target requested the following URI:",
-          c->linkhover);
+        print_debug("newwindow() --> Target requested the following URI: "
+          "%s\n", c->linkhover);
         cmd[i++] = c->linkhover;
     }
 
@@ -3519,15 +3511,13 @@ int main(int argc, char *argv[])
 
     // If given an URI argument, go ahead and use it.
     if (argc > 0 && argv[0] && strlen(argv[0])) {
-        print_debug("%s\n%s\n",
-          "main() --> The following URL argument was given:",
+        print_debug("main() --> The following URL argument was given: %s\n",
           argv[0]);
         loaduri(clients, (char*) argv[0]);
 
     // Otherwise take the browser to the default home page.
     } else {
-        print_debug("%s\n%s\n",
-          "main() --> The following URL argument was given:",
+        print_debug("main() --> The following URL argument was given: %s\n",
           default_home_page);
         loaduri(clients, default_home_page);
         updatetitle(c);
@@ -3547,4 +3537,3 @@ int main(int argc, char *argv[])
     // If all when well, we can simply exit peacefully
     return 0;
 }
-
