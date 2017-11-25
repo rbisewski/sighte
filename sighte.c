@@ -55,7 +55,25 @@ void print_debug(const char* format, ...)
     return;
 }
 
-//! Group an accel (keystroke) to the intended Client. 
+//! Send the kill signal to one of our child processes.
+/*!
+ * @return  none
+ */
+void sigchld()
+{
+    // Send the signal
+    if (signal(SIGCHLD, sigchld) == SIG_ERR) {
+        terminate("Can't install SIGCHLD handler");
+    }
+
+    // Cycle until our process is dead.
+    while (0 < waitpid(-1, NULL, WNOHANG));
+
+    // The process is dead, long live the process!
+    return;
+}
+
+//! Group an accel (keystroke) to the intended Client.
 /*!
  * @param    Client  the object we wish to add our accel group to.
  *
@@ -72,13 +90,13 @@ void registerkeystroke(Client *c)
     unsigned int i = 0;
     GClosure *closure;
     GtkAccelGroup *group = gtk_accel_group_new();
- 
+
     // Sanity check, make sure this got an accel group.
     if (!group) {
         return;
     }
- 
-    // Cycle through each of the elements in our keys 
+
+    // Cycle through each of the elements in our keys
     for (i = 0; i < LENGTH(keys); i++) {
 
         // Assigned a potential connection for our GTK closure object.
@@ -91,7 +109,7 @@ void registerkeystroke(Client *c)
             continue;
         }
 
-        // Connect each of keys to a new accel closure. 
+        // Connect each of keys to a new accel closure.
         gtk_accel_group_connect(group,
                                 keys[i].keyval,
                                 keys[i].mod,
@@ -114,8 +132,8 @@ void registerkeystroke(Client *c)
 /*!
  * @param   WebKitWebView       contents of open window
  * @param   WebKitURIRequest    internet/intranet location requested
- * @param   WebKitURIResponse   response from out request       
- * @param   Client              intended recipient       
+ * @param   WebKitURIResponse   response from out request
+ * @param   Client              intended recipient
  *
  * @return  none
  */
@@ -127,9 +145,9 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         return;
     }
 
-    // Variable declaration 
+    // Variable declaration
     unsigned int i = 0;
-    
+
     // Attempt to grab the requested URI (as a string).
     char *uri = (char *) webkit_uri_request_get_uri(req);
     char *quoted_uri = NULL;
@@ -222,13 +240,13 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     webkit_web_view_stop_loading(w);
 
     // Assemble the arguments we need.
-    Arg arg = { .v = (char *[]){"/bin/sh",
-                                "-c",
-                                "xdg-open",
-                                quoted_uri,
-                                NULL}};
+    Arg arg = { .v = (const char *[]){"/bin/sh",
+                                      "-c",
+                                      "xdg-open",
+                                      quoted_uri,
+                                      NULL}};
 
-    // Afterwards free the temporary string 
+    // Afterwards free the temporary string
     if (quoted_uri) {
         free(quoted_uri);
     }
@@ -262,7 +280,7 @@ char* buildfile(const char *path)
     char *fpath = NULL;
     FILE *f     = NULL;
 
-    // Assemble our filepath string.  
+    // Assemble our filepath string
     fpath = g_build_filename(buildpath(g_path_get_dirname(path)),
                              g_path_get_basename(path),
                              NULL);
@@ -334,7 +352,7 @@ char* buildpath(const char *path)
         // Go ahead and build the pathu using the above pieces.
         tmp_path = g_build_filename(pw->pw_dir, p, NULL);
 
-    // For all other cases of the ~ location... 
+    // For all other cases of the ~ location...
     } else if (path[0] == '~') {
 
         // Take into account any errant '/' characters, as POSIX says they
@@ -358,7 +376,7 @@ char* buildpath(const char *path)
             terminate("Unable to get user %s home directory: %s.\n", name, path);
         }
 
-        // Clean away our name memory. 
+        // Clean away our name memory.
         free(name);
 
         // Attempt to assemble our path.
@@ -392,9 +410,9 @@ char* buildpath(const char *path)
 
 //! Check if the button push was released.
 /*
- * @param   WebKitWebView   originating web view 
+ * @param   WebKitWebView   originating web view
  * @param   GdkEventButton  button causing the event
- * @param   Client          current client 
+ * @param   Client          current client
  *
  * @return  bool            true  --> event completed successfully
  *                          false --> propagate event further
@@ -426,15 +444,18 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
 
     // Retrieve the URI of the link...
     if (webkit_hit_test_result_context_is_link(c->hit_test_result)) {
-        arg.v = (void*)webkit_hit_test_result_get_link_uri(c->hit_test_result);
+        arg.v = (const void*)
+          webkit_hit_test_result_get_link_uri(c->hit_test_result);
 
     // ...or the URI of image...
     } else if (webkit_hit_test_result_context_is_image(c->hit_test_result)) {
-        arg.v = (void*)webkit_hit_test_result_get_image_uri(c->hit_test_result);
-    
+        arg.v = (const void*)
+          webkit_hit_test_result_get_image_uri(c->hit_test_result);
+
     // ...or the URI of the media request.
     } else if (webkit_hit_test_result_context_is_media(c->hit_test_result)) {
-        arg.v = (void*)webkit_hit_test_result_get_media_uri(c->hit_test_result);
+        arg.v = (const void*)
+          webkit_hit_test_result_get_media_uri(c->hit_test_result);
     }
 
     // Sanity check, make sure we got back a link.
@@ -442,7 +463,7 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
         return false;
     }
 
-    // Cycle thru all possible button actions... 
+    // Cycle thru all possible button actions...
     for (i = 0; i < LENGTH(buttons); i++) {
 
         // If our event exists, seems sane, and has an assigned action, then
@@ -456,7 +477,7 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
             if (buttons[i].click == ClkLink && buttons[i].arg.i == 0) {
                 buttons[i].func(c, &arg);
 
-            // Otherwise just go ahead and use our button's arguments instead. 
+            // Otherwise just go ahead and use our button's arguments instead.
             } else {
                 buttons[i].func(c, &buttons[i].arg);
             }
@@ -522,7 +543,7 @@ void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
     // Establish a file lock on our cookie jar. Probably not a good idea to
     // let multiple request processes access the file at once since bad
     // things can happen to the file. Plus might as well be safe if we can.
-    flock(COOKIEJAR(self)->lock, LOCK_EX); 
+    flock(COOKIEJAR(self)->lock, LOCK_EX);
 
     // If we have a valid cookie that isn't set to expire, then assign it
     // an expiry time, since cookies should not last forever.
@@ -537,7 +558,7 @@ void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
                                                            new_cookie);
 
     // Release the file lock on our cookie jar.
-    flock(COOKIEJAR(self)->lock, LOCK_UN); 
+    flock(COOKIEJAR(self)->lock, LOCK_UN);
 
     // Otherwise everything went fine, so simply return here.
     return;
@@ -552,7 +573,7 @@ void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
  */
 void cookiejar_class_init(CookieJarClass *jar)
 {
-    // Set the function that will run whenever a cookie has changed. 
+    // Set the function that will run whenever a cookie has changed.
     SOUP_COOKIE_JAR_CLASS(jar)->changed = cookiejar_changed;
 
     // Set the function that will retrieve cookie properties.
@@ -605,7 +626,7 @@ void cookiejar_init(CookieJar *self)
     return;
 }
 
-//! Assemble our new cookie jar file, based on the given policy. 
+//! Assemble our new cookie jar file, based on the given policy.
 /*
  * @param   string                     cookie jar filename
  * @param   bool                       whether or not our file is read only
@@ -639,7 +660,7 @@ SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
 void cookiejar_set_property(GObject *self, unsigned int prop_id,
   const GValue *value, GParamSpec *pspec)
 {
-    // Place a shared lock on our cookie jar file. 
+    // Place a shared lock on our cookie jar file.
     flock(COOKIEJAR(self)->lock, LOCK_SH);
 
     // Define the intended property in the cookie file.
@@ -1537,20 +1558,20 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // browser, so this has since been replaced with aria2c, which can
     // safely and securely download files in a lightweight manner.
     //
-    arg.v = (char*[]){"/usr/bin/aria2c",
-                      (debug_mode) ? "--quiet=false" : "--quiet=true",
-                      "-d",
-                      downloads_location,
-                      "-o",
-                      url_base_filename,
-                      "--stderr=false",
-                      "--no-conf=true",
-                      "--user-agent",
-                      useragent,
-                      "--referer",
-                      geturi(c),
-                      (char*) webkit_uri_request_get_uri(r),
-                      NULL};
+    arg.v = (const char*[]){"/usr/bin/aria2c",
+                            (debug_mode) ? "--quiet=false" : "--quiet=true",
+                            "-d",
+                            downloads_location,
+                            "-o",
+                            url_base_filename,
+                            "--stderr=false",
+                            "--no-conf=true",
+                            "--user-agent",
+                            useragent,
+                            "--referer",
+                            geturi(c),
+                            (char*) webkit_uri_request_get_uri(r),
+                            NULL};
 
     // If debug mode, get ready to dump all of the cURL arguments to the
     // stdout for the purpose of examining them.
@@ -2592,7 +2613,8 @@ void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
     }
 
     // Set the progress value to the current progress.
-    c->progress = webkit_web_view_get_estimated_load_progress(c->view) * 100;
+    c->progress
+      = (int) (webkit_web_view_get_estimated_load_progress(c->view) * 100.0);
 
     // Update the given title. 
     updatetitle(c);
@@ -2756,24 +2778,6 @@ void setup(void)
     return;
 }
 
-//! Send the kill signal to one of our child processes.
-/*!
- * @return  none
- */
-void sigchld()
-{
-    // Send the signal 
-    if (signal(SIGCHLD, sigchld) == SIG_ERR) {
-        terminate("Can't install SIGCHLD handler");
-    }
-
-    // Cycle until our process is dead.
-    while (0 < waitpid(-1, NULL, WNOHANG));
-
-    // The process is dead, long live the process!
-    return;
-}
-
 //! Spawn a child process, useful for new windows or downloads.
 /*!
  * @param   Arg      given list of arguments
@@ -2795,6 +2799,9 @@ void spawn(const Arg *arg)
         return;
     }
 
+    // variable declaration
+    const char** list = arg->v;
+
     // If debug, tell the end-user that the process has been successfully
     // forked since subprocesses will return 0.
     print_debug("spawn() --> fork() has returned a zero value here. So "
@@ -2812,11 +2819,11 @@ void spawn(const Arg *arg)
 
     // Attempt to execute our given arguments.
     print_debug("spawn() --> Executing...\n");
-    execvp(((char **)arg->v)[0], (char **)arg->v);
+    execvp(list[0], arg->v);
 
     // If this process is still hanging on, then probably we should inform
     // the end user that something horrible has happened.
-    fprintf(stderr, "sighte: execvp %s", ((char **)arg->v)[0]);
+    fprintf(stderr, "sighte: execvp %s", list[0]);
 
     // Throw an error stating "pid x failed".
     perror(" failed");
@@ -3155,7 +3162,7 @@ void togglecookiepolicy(Client *c, const Arg *arg)
     g_object_get(G_OBJECT(jar), "accept-policy", &policy, NULL);
 
     // Switch to the next policy.
-    policysel = (policysel+1) % strlen(cookiepolicies);
+    policysel = (policysel+1) % ((int) strlen(cookiepolicies));
 
     // Alter the cookie jar policy.
     g_object_set(G_OBJECT(jar),

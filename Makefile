@@ -59,6 +59,42 @@ CFLAGS = -std=c99 \
          -Wextra \
          -Wpedantic \
          -Wno-missing-braces\
+         -Wformat=2 \
+         -Wformat-signedness \
+         -Wnull-dereference \
+         -Winit-self \
+         -Wmissing-include-dirs \
+         -Wshift-overflow=2 \
+         -Wswitch-default \
+         -Wswitch-enum \
+         -Wunused-const-variable=2 \
+         -Wuninitialized \
+         -Wunknown-pragmas \
+         -Wstrict-overflow=5 \
+         -Warray-bounds=2 \
+         -Wduplicated-cond \
+         -Wfloat-equal \
+         -Wundef \
+         -Wshadow \
+         -Wbad-function-cast \
+         -Wcast-qual \
+         -Wcast-align \
+         -Wwrite-strings \
+         -Wconversion \
+         -Wjump-misses-init \
+         -Wlogical-op \
+         -Waggregate-return \
+         -Wcast-align \
+         -Wstrict-prototypes \
+         -Wold-style-definition \
+         -Wmissing-prototypes \
+         -Wmissing-declarations \
+         -Wpacked \
+         -Wredundant-decls \
+         -Wnested-externs \
+         -Winline \
+         -Winvalid-pch \
+         -Wstack-protector \
          ${INCS} \
          -DVERSION=\"${VERSION}\" \
          -D_DEFAULT_SOURCE

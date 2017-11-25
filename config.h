@@ -12,10 +12,10 @@ static bool debug_mode   = DEBUG_MODE;
 static bool verbose_mode = VERBOSE_MODE;
 
 // User agent of browser.
-static char *useragent  = "Sighte/"VERSION;
+static const char* useragent = "Sighte/"VERSION;
 
 // Default page title
-static const char *default_page_title = "sighte Browser";
+static const char* default_page_title = "sighte Browser";
 
 // Default starting size
 static const int browser_window_starting_height = 1280;
@@ -25,9 +25,9 @@ static const int browser_window_starting_width  = 768;
 static const char *default_home_page = "https://start.duckduckgo.com";
 
 // JS Script variables
-static char *scriptfile  = CACHE_DATA_PATH"/script.js";
-static char *styledir    = CACHE_DATA_PATH"/styles/";
-static char *cachefolder = CACHE_DATA_PATH"/cache/";
+static const char *scriptfile  = CACHE_DATA_PATH"/script.js";
+static const char *styledir    = CACHE_DATA_PATH"/styles/";
+static const char *cachefolder = CACHE_DATA_PATH"/cache/";
 
 // Start the browser in a normal, non-fullscreen fashion.
 static bool runinfullscreen = false;
@@ -46,14 +46,14 @@ static double zoomlevel = 1.0;
 // a: accept nothing
 // @: accept all except third party
 //
-static char *cookiefile     = CACHE_DATA_PATH"/cookies.txt";
-static char *cookiepolicies = "Aa@"; 
+static const char *cookiefile     = CACHE_DATA_PATH"/cookies.txt";
+static const char *cookiepolicies = "Aa@";
 
 // Downloaded files location
-static char *downloads_location = "~/";
+static const char *downloads_location = "~/";
 
 // Certificate variables
-static char *cafile       = "/etc/ssl/certs/ca-certificates.crt";
+static const char *cafile = "/etc/ssl/certs/ca-certificates.crt";
 static bool strictssl     = true; // Use this to accept / refuse untrusted
                                   // SSL connections
 static time_t sessiontime = 3600;

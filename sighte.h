@@ -228,7 +228,7 @@ void cookiejar_changed(SoupCookieJar*, SoupCookie*, SoupCookie*);
  *
  * @return  none
  */
-void cookiejar_class_init(CookieJarClass*);
+//void cookiejar_class_init(CookieJarClass*);
 
 //! finalize and close the cookie jar via callback.
 /*
@@ -244,7 +244,7 @@ void cookiejar_finalize(GObject*);
  *
  * @return  none
  */
-void cookiejar_init(CookieJar*);
+//void cookiejar_init(CookieJar*);
 
 //! Assemble our new cookie jar file, based on the given policy. 
 /*
@@ -584,7 +584,7 @@ void setup(void);
 /*!
  * @return  none
  */
-void sigchld();
+//void sigchld();
 
 //! Spawn a child process, useful for new windows or downloads.
 /*!
