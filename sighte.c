@@ -1233,7 +1233,6 @@ void find(Client *c, const Arg *arg)
     // Variable declaration
     WebKitFindController *wfc = webkit_web_view_get_find_controller(c->view);
     guint32 wfc_options       = WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE;
-    bool search_forwards      = *(bool *)arg;
 
     // Sanity check, make sure this actually returned a finder.
     if (!wfc) {
@@ -1258,7 +1257,7 @@ void find(Client *c, const Arg *arg)
     }
 
     // If given the command to search backwards, attempt to do so.
-    if (!search_forwards) {
+    if (!arg->b) {
         wfc_options |= WEBKIT_FIND_OPTIONS_BACKWARDS; 
     }
 
@@ -1554,7 +1553,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
                             useragent,
                             "--referer",
                             geturi(c),
-                            (char*) webkit_uri_request_get_uri(r),
+                            webkit_uri_request_get_uri(r),
                             NULL};
 
     // If debug mode, get ready to dump all of the cURL arguments to the
@@ -2017,7 +2016,7 @@ void navigate(Client *c, const Arg *arg)
     }
 
     // Determine our number of steps based on our argument count.
-    int steps = *(int *)arg;
+    int steps = arg->i;
 
     // If zero, then the user is requesting the browser go to the home page.
     if (steps == 0) {
@@ -2639,20 +2638,14 @@ void linkopen(Client *c, const Arg *arg)
  */
 void reload(Client *c, const Arg *arg)
 {
-    // Check to see if this program is currently using cache.
-    bool nocache = *(bool *)arg;
-
     // If not using cache, we need to bypass.
-    if (nocache) {
+    if (arg->b) {
         webkit_web_view_reload_bypass_cache(c->view);
-
-    // Otherwise just the normal reload is good.
-    } else {
-        webkit_web_view_reload(c->view);
+        return;
     }
 
-    // Back, back foul daemon.
-    return;
+    // Otherwise just the normal reload is good.
+    webkit_web_view_reload(c->view);
 }
 
 //! Initialize basic browser functionality.
@@ -2790,7 +2783,7 @@ void spawn(const Arg *arg)
     }
 
     // variable declaration
-    const char** list = arg->v;
+    const char* const* list = arg->v;
 
     // If debug, tell the end-user that the process has been successfully
     // forked since subprocesses will return 0.
