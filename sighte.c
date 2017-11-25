@@ -55,24 +55,6 @@ void print_debug(const char* format, ...)
     return;
 }
 
-//! Send the kill signal to one of our child processes.
-/*!
- * @return  none
- */
-void sigchld()
-{
-    // Send the signal
-    if (signal(SIGCHLD, sigchld) == SIG_ERR) {
-        terminate("Can't install SIGCHLD handler");
-    }
-
-    // Cycle until our process is dead.
-    while (0 < waitpid(-1, NULL, WNOHANG));
-
-    // The process is dead, long live the process!
-    return;
-}
-
 //! Group an accel (keystroke) to the intended Client.
 /*!
  * @param    Client  the object we wish to add our accel group to.
@@ -331,6 +313,7 @@ char* buildpath(const char *path)
     char *name     = NULL;
     char *p        = NULL;
     char *fpath    = NULL;
+    size_t pos     = 0;
 
     // If our path is ~ or ~ plus some directory, then we need to account
     // for this by adjusting based on the username, which we from our
@@ -358,7 +341,14 @@ char* buildpath(const char *path)
         // Take into account any errant '/' characters, as POSIX says they
         // are completely valid, hence this logic.
         if ((p = strchr(path, '/'))) {
-            name = strndup(&path[1], --p - path);
+
+            // determine the position; both `p` and `path` should be
+            // non-NULL here, so this is probably safe
+            pos = ((size_t)(--p)) - ((size_t) path);
+
+            // use the position to get an idea of where to replace the
+            // string
+            name = strndup(&path[1], pos);
 
         // Otherwise our string is clean, so just do a straight dump.
         } else {
@@ -512,12 +502,6 @@ void cleanup(void)
     print_debug("cleanup() --> Freeing memory from styles file ref.\n");
     if (stylefile) {
         free(stylefile);
-    }
-
-    // Using a cookie file? Clean it up.
-    print_debug("cleanup() --> Freeing memory from cookies file ref.\n");
-    if (cookiefile) {
-        free(cookiefile);
     }
 
     // All the cleanup is now completed.
@@ -2377,8 +2361,9 @@ Client* newclient(void)
         setstyle(c, getstyle("about:blank"));
     }
 
-    // Set the intended zoom level for the specific page.
-    if (zoomlevel != 1.0) {
+    // Set the intended zoom level for the specific page, assuming it
+    // isn't the typical default zoom ~1.0 value
+    if (zoomlevel < 0.9 || zoomlevel > 1.1) {
         webkit_web_view_set_zoom_level(c->view, zoomlevel);
     }
 
@@ -2685,8 +2670,13 @@ void setup(void)
     GProxyResolver *pr;
     GError *error = NULL;
 
-    // Send the signal to clean up any zombies immediately
-    sigchld(0);
+    // wait and clean up child processes
+    if (signal(SIGCHLD, 0) == SIG_ERR) {
+        terminate("Can't install SIGCHLD handler");
+    }
+    while (0 < waitpid(-1, NULL, WNOHANG));
+
+    // start a new GTK app instance
     gtk_init(NULL, NULL);
 
     // Grab the current display
@@ -3002,7 +2992,7 @@ bool handle_dialog_keypress(GtkWidget *w, GdkEventKey *e, Client *c)
         } else if (c->dialog_action == DIALOG_ACTION_FIND) {
 
             // Set the find atom.
-            c->text_to_search_for = (char*) input_box_text;
+            c->text_to_search_for = input_box_text;
 
             // Set an argument stating that we want to search forwards. 
             const Arg a = { .b = true };
