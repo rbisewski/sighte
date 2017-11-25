@@ -580,12 +580,6 @@ void reload(Client*, const Arg*);
  */
 void setup(void);
 
-//! Send the kill signal to one of our child processes.
-/*!
- * @return  none
- */
-//void sigchld();
-
 //! Spawn a child process, useful for new windows or downloads.
 /*!
  * @param   Arg      given list of arguments
