@@ -59,14 +59,14 @@ static bool strictssl     = true; // Use this to accept / refuse untrusted
 static time_t sessiontime = 3600;
 
 // Webkit default features
-static bool enablespatialbrowsing = true;
-static bool enablediskcache       = false;
-static int  diskcachebytes        = 5 * 1024 * 1024;
-static bool enableplugins         = true;
-static bool enablescripts         = true;
-static bool enablestyle           = true;
-static bool loadimages            = true;
-static bool allowgeolocation      = true;
+static bool enablespatialbrowsing  = true;
+static bool enablediskcache        = false;
+static unsigned int diskcachebytes = 5 * 1024 * 1024;
+static bool enableplugins          = true;
+static bool enablescripts          = true;
+static bool enablestyle            = true;
+static bool loadimages             = true;
+static bool allowgeolocation       = true;
 
 // List of styles to be stored into the given filename.
 //
