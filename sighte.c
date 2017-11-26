@@ -516,6 +516,7 @@ void cleanup(void)
  *
  * @return  none
  */
+/*
 void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
   SoupCookie *new_cookie)
 {
@@ -547,6 +548,7 @@ void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
     // Otherwise everything went fine, so simply return here.
     return;
 }
+*/
 
 //! Setup our cookie struct so that it behaves like a C++ object with
 //! essential callbacks.
@@ -555,6 +557,7 @@ void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
  *
  * @return  none
  */
+/*
 void cookiejar_class_init(CookieJarClass *jar)
 {
     // Set the function that will run whenever a cookie has changed.
@@ -576,13 +579,14 @@ void cookiejar_class_init(CookieJarClass *jar)
     // Finally having finished setting the cookie, go ahead and leave.
     return;
 }
-
+*/
 //! finalize and close the cookie jar via callback.
 /*
  * @param   gobject   the cookie jar itself
  *
  * @return  none
  */
+/*
 void cookiejar_finalize(GObject *self)
 {
     // Remove the lock on the cookie jar.
@@ -594,6 +598,7 @@ void cookiejar_finalize(GObject *self)
     // Return once this is finished.
     return;
 }
+*/
 
 //! Initialize and open a lock on the cookie jar via callback.
 /*
@@ -601,6 +606,7 @@ void cookiejar_finalize(GObject *self)
  *
  * @return  none
  */
+/*
 void cookiejar_init(CookieJar *self)
 {
     // Open a lock on our cookie jar.
@@ -609,6 +615,7 @@ void cookiejar_init(CookieJar *self)
     // Return once this is finished.
     return;
 }
+*/
 
 //! Assemble our new cookie jar file, based on the given policy.
 /*
@@ -618,6 +625,7 @@ void cookiejar_init(CookieJar *self)
  *
  * @return  SoupCookieJar              newly generated cookie jar
  */
+/*
 SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
   SoupCookieJarAcceptPolicy policy)
 {
@@ -631,6 +639,7 @@ SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
                         policy,
                         NULL);
 }
+*/
 
 //! Set a property of a cookie inside of our cookie jar.
 /*!
@@ -641,6 +650,7 @@ SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
  *
  * @return  none
  */
+/*
 void cookiejar_set_property(GObject *self, unsigned int prop_id,
   const GValue *value, GParamSpec *pspec)
 {
@@ -658,6 +668,7 @@ void cookiejar_set_property(GObject *self, unsigned int prop_id,
     // Return from here.
     return;
 }
+*/
 
 //! Check our current cookies policy to determine how we want to handle
 //! incoming cookies.
@@ -2700,9 +2711,11 @@ void setup(void)
     default_soup_session = soup_session_new();
 
     // Add the cookie jar
+    /*
     soup_session_add_feature(default_soup_session,
                              SOUP_SESSION_FEATURE(cookiejar_new(cookiefile,
                              FALSE, cookiepolicy_get())));
+    */
 
     // If disk caching, then go ahead and use it.
     if (enablediskcache) {

@@ -56,7 +56,7 @@ static const char *downloads_location = "~/";
 static const char *cafile = "/etc/ssl/certs/ca-certificates.crt";
 static bool strictssl     = true; // Use this to accept / refuse untrusted
                                   // SSL connections
-static time_t sessiontime = 3600;
+//static time_t sessiontime = 3600;
 
 // Webkit default features
 static bool enablespatialbrowsing  = true;
