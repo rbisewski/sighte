@@ -93,7 +93,7 @@ typedef struct Client {
     char *linkhover;
 
     // Latest text that was searched for.
-    char *text_to_search_for;
+    const char *text_to_search_for;
 
     // Load progress, as a percentage.
     int progress;
@@ -142,8 +142,8 @@ G_DEFINE_TYPE(CookieJar, cookiejar, SOUP_TYPE_COOKIE_JAR_TEXT)
 
 // User-defined site styles.
 typedef struct {
-    char *regex;
-    char *style;
+    const char *regex;
+    const char *style;
     regex_t re;
 } SiteStyle;
 
@@ -385,7 +385,7 @@ bool geopolicyrequested(WebKitWebView*, WebKitGeolocationPermissionRequest*,
  *
  * @return  string   URI
  */
-char* geturi(Client*);
+const char* geturi(Client*);
 
 //! Grab or assemble the relevant style files.
 /*!

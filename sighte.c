@@ -131,7 +131,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     unsigned int i = 0;
 
     // Attempt to grab the requested URI (as a string).
-    char *uri = (char *) webkit_uri_request_get_uri(req);
+    const char *uri = webkit_uri_request_get_uri(req);
     char *quoted_uri = NULL;
 
     // Sanity check, end here if we got a blank string.
@@ -211,7 +211,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
 
     // Clear the original uri away since the quoted version of it is
     // what will be used at this point.
-    free(uri);
+    //free(uri);
 
     // If debug mode, show the end-user what the quoted URI looks like
     // from a string point-of-view.
@@ -311,7 +311,7 @@ char* buildpath(const char *path)
     struct passwd *pw;
     char *tmp_path = NULL;
     char *name     = NULL;
-    char *p        = NULL;
+    const char *p  = NULL;
     char *fpath    = NULL;
     size_t pos     = 0;
 
@@ -321,7 +321,7 @@ char* buildpath(const char *path)
     if (path[0] == '~' && (path[1] == '/' || path[1] == '\0')) {
 
         // Grab the path after ~
-        p = (char *)&path[1];
+        p = &path[1];
 
         // Attempt to grab the password file user id data.
         pw = getpwuid(getuid());
@@ -531,9 +531,9 @@ void cookiejar_changed(SoupCookieJar *self, SoupCookie *old_cookie,
 
     // If we have a valid cookie that isn't set to expire, then assign it
     // an expiry time, since cookies should not last forever.
-    if (!new_cookie->expires && sessiontime) {
+    if (!new_cookie->expires && sessiontime > 0) {
         soup_cookie_set_expires(new_cookie,
-                                soup_date_new_from_now(sessiontime));
+          soup_date_new_from_now((int) sessiontime));
     }
 
     // Adjust our cookie as per the new cookie data.
@@ -1346,7 +1346,7 @@ bool geopolicyrequested(WebKitWebView *v,
  *
  * @return  string   URI
  */
-char* geturi(Client *c)
+const char* geturi(Client *c)
 {
     // Input validation
     if (!c) {
@@ -1360,7 +1360,7 @@ char* geturi(Client *c)
 
     // Otherwise return the URI as a string.
     print_debug("geturi() --> Attempting to grab URI.\n");
-    return (char *)webkit_web_view_get_uri(c->view);
+    return webkit_web_view_get_uri(c->view);
 }
 
 //! Grab or assemble the relevant style files.
@@ -1451,7 +1451,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // Variable declaration
     Arg arg;
-    char **arg_list = NULL;
+    const char* const* arg_list = NULL;
     int i = 0;
     char *url_base_filename  = NULL;
     char *download_file_path = NULL;
@@ -1562,7 +1562,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
         // If debug, print out the argument being used.
         print_debug("initdownload() --> cURL Download Argument:\n");
-        arg_list = (char**) arg.v;
+        arg_list = arg.v;
         for (i = 0; arg_list[i]; i++) {
             print_debug("%s\n",arg_list[i]);
         }
@@ -3093,7 +3093,7 @@ void toggle(Client *c, const Arg *arg)
 
     // Variable declaration
     WebKitSettings *settings = webkit_web_view_get_settings(c->view);
-    char *name = (char *)arg->v;
+    const char *name = arg->v;
     bool value = false;
     Arg a      = { .b = FALSE };
 
