@@ -2782,16 +2782,11 @@ void setup(void)
  */
 void spawn(const Arg *arg)
 {
-    // If we failed to fork, or this process is the parent, then go ahead
-    // and return.
-    //
-    // Note: I don't think we need to throw errors here if we fail, but I'm
-    //       not entirely sure. 
-    //
-    if (fork() != 0) {
-        print_debug("spawn() --> fork() has returned a non-zero value here. "
-                    "So the original process has *probably* passed through "
-                    "here intact.\n");
+    // handle the subprocess properly
+    if (fork() == 0) {
+        print_debug("spawn() --> fork() has returned a zero value here,"
+                    "suggesting it is the subprocess. Ergo the original "
+                    "process has *probably* passed through here intact.\n");
         return;
     }
 
