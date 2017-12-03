@@ -2783,8 +2783,8 @@ void setup(void)
 void spawn(const Arg *arg)
 {
     // handle the subprocess properly
-    if (fork() == 0) {
-        print_debug("spawn() --> fork() has returned a zero value here,"
+    if (fork() != 0) {
+        print_debug("spawn() --> fork() has returned a non-zero value here,"
                     "suggesting it is the subprocess. Ergo the original "
                     "process has *probably* passed through here intact.\n");
         return;
