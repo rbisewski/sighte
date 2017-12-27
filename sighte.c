@@ -51,7 +51,6 @@ void print_debug(const char* format, ...)
     vprintf(format, arglist);
     va_end(arglist);
 
-    // once all the strings have been printed, leave
     return;
 }
 
@@ -105,8 +104,6 @@ void registerkeystroke(Client *c)
     // Tell the end user that the closure assignments are complete.
     print_debug("registerkeystroke() --> The client has now been assigned "
                 "the relevant closures.\n");
-
-    // Done here...
     return;
 }
 
@@ -208,10 +205,6 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
         print_debug("prerequest() --> Unable to quote the requested URI!\n");
         return;
     }
-
-    // Clear the original uri away since the quoted version of it is
-    // what will be used at this point.
-    //free(uri);
 
     // If debug mode, show the end-user what the quoted URI looks like
     // from a string point-of-view.
@@ -662,7 +655,7 @@ void cookiejar_set_property(GObject *self, unsigned int prop_id,
                                                          prop_id,
                                                          value,
                                                          pspec);
-    // Remove the shared lock on our cookie jar file. 
+    // Remove the shared lock on our cookie jar file.
     flock(COOKIEJAR(self)->lock, LOCK_UN);
 
     // Return from here.
@@ -683,11 +676,11 @@ SoupCookieJarAcceptPolicy cookiepolicy_get(void)
     // Never accept cookies.
     case 'a':
         return SOUP_COOKIE_JAR_ACCEPT_NEVER;
-    
+
     // Never accept 3rd party cookies.
     case '@':
         return SOUP_COOKIE_JAR_ACCEPT_NO_THIRD_PARTY;
-    
+
     // Our default option...
     case 'A':
     default:
@@ -730,12 +723,12 @@ char cookiepolicy_set(const SoupCookieJarAcceptPolicy ep)
 
 //! Attempt to execute the intended javascript code.
 /*!
- * @param   Client   current client 
+ * @param   Client   current client
  *
  * @return  none
  */
 void runscript(Client *c)
-{  
+{
     // Input validation
     if (!c) {
         return;
@@ -831,11 +824,11 @@ void runscript(Client *c)
     return;
 }
 
-//! Copy a string from source to destination. 
+//! Copy a string from source to destination.
 /*!
  * @param   string*   pointer to a string
  * @param   string    original content
- *  
+ *
  * @return  string*   same as **dest
  */
 char* assign_to_str(char **dest, const char *src)
@@ -859,7 +852,7 @@ char* assign_to_str(char **dest, const char *src)
     return tmp;
 }
 
-//! Creates a new window and returns the view point. 
+//! Creates a new window and returns the view point.
 /*!
  * @param    WebKitWebView            pointer to the window view pane
  * @param    WebKitNavigationAction   navigation action data
@@ -964,7 +957,7 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
         // Make a policy decision for download in question.
         webkit_policy_decision_download(p);
 
-        // Consider the event completed. 
+        // Consider the event completed.
         return true;
     }
 
@@ -1026,15 +1019,15 @@ bool determine_if_download(WebKitWebView *v, WebKitPolicyDecision *p)
     return true;
 }
 
-//! Determine whether or not to open a new window. 
+//! Determine whether or not to open a new window.
 /*!
  * @param    WebKitWebView              window view
  * @param    WebKitPolicyDecision       policy for handling requests
  * @param    WebKitPolicyDecisionType   policy for handling requests
  * @param    Client                     current client
- * 
+ *
  * @return   bool                       false --> pass along event
- *                                      true  --> event completed  
+ *                                      true  --> event completed
  */
 bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
   WebKitPolicyDecisionType t, Client *c)
@@ -1055,7 +1048,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
         print_debug("decidepolicy() --> Policy decision request resembles a "
                     "possible download.\n");
         return determine_if_download(view,p);
-    } 
+    }
 
     // Right now this function only handles navigation via links, so check
     // to ensure that the asserts the correct type.
@@ -1097,8 +1090,8 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     webkit_policy_decision_ignore(p);
 
     // Attempt to extract the requested URI from the navigation object.
-    r = webkit_navigation_action_get_request(n); 
-    
+    r = webkit_navigation_action_get_request(n);
+
     // As this function is now done with the nav-action, it ought to be freed.
     webkit_navigation_action_free(n);
 
@@ -1169,8 +1162,8 @@ void destroyclient(GtkWidget* w, Client *c)
     // Check if a pre-existing dialog window is open.
     print_debug("destroyclient() --> Attempting to clean GTK dialog...\n");
     if (c->dialog) {
-   
-        // Hide the current dialog. 
+
+        // Hide the current dialog.
         gtk_widget_hide(c->dialog);
 
         // Since it is using memory, it needs to be freed.
@@ -1269,7 +1262,7 @@ void find(Client *c, const Arg *arg)
 
     // If given the command to search backwards, attempt to do so.
     if (!arg->b) {
-        wfc_options |= WEBKIT_FIND_OPTIONS_BACKWARDS; 
+        wfc_options |= WEBKIT_FIND_OPTIONS_BACKWARDS;
     }
 
     // Attempt to determine if the text exists within the page, up to a
@@ -1297,7 +1290,7 @@ void fullscreen(Client *c, const Arg *arg)
     // Input validation
     if (!c) {
         return;
-    } 
+    }
 
     // If fullscreen, go ahead and return to normal.
     if (c->fullscreen) {
@@ -1332,7 +1325,7 @@ bool geopolicyrequested(WebKitWebView *v,
     // Input validation.
     if (!d || !c) {
         return false;
-    } 
+    }
 
     // If we allow Geolocation, go ahead and send the allow signal.
     if (allowgeolocation) {
@@ -1378,7 +1371,7 @@ const char* geturi(Client *c)
 /*!
  * @param   string   URI location
  *
- * @return  none 
+ * @return  none
  */
 const char* getstyle(const char *uri)
 {
@@ -1432,28 +1425,21 @@ void setstyle(Client *c, const char *style)
         return;
     }
 
-    // Set the style 
+    // Set the style
     webkit_user_content_manager_add_style_sheet(wcm,stylesheet);
-
-    // Clean up any remaining memory
-    //
-    // TODO: delete this once sufficient testing has determined if this
-    //       currently is working fine without the need to free() here
-    //
-    //free(stylesheet);
-    //free(wcm);
-
-    // Gotta go.
     return;
 }
 
 //! Initialize the download request to grab the intended file.
-/*! 
+/*!
  * @param    WebKitWebView    given window view
  * @param    WebKitDownload   newly created instance used for downloading
  * @param    Client           current client
  *
  * @return   bool             only false since we want to return zero.
+ *
+ * TODO: implement PDF reader auto-open functionality at some time in the
+ *       future; right now all it does is download them to /tmp/
  */
 bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 {
@@ -1465,8 +1451,8 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     const char* const* arg_list = NULL;
     int i = 0;
     char *url_base_filename  = NULL;
-    char *download_file_path = NULL;
-    GtkWidget *box_content   = NULL;
+    bool isPDF = false;
+    const char *err = NULL;
 
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
@@ -1504,30 +1490,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 
     // Append the static global downloads_location (see config.h) to the
     // cURL argument for file output.
-    download_file_path = g_build_filename(downloads_location,
-                                          url_base_filename,
-                                          NULL);
-
-    // Sanity check, make sure this actually assembled a path.
-    if (!download_file_path) {
-
-        // If debug, tell the user what happened
-        print_debug("initdownload() --> Unable to allocate memory to "
-                    "build download file path.\n");
-
-        // Free the url_base_filename string if it exists.
-        if (url_base_filename) {
-            free(url_base_filename);
-        }
-
-        // If debug, tell the user this terminates the download request.
-        print_debug("initdownload() --> Terminating download request...\n");
-        return false;
-    }
-
-    // If debug, tell the user that the program cURL arguments are being
-    // defined.
-    print_debug("initdownload() --> Defining cURL arguments...\n");
+    isPDF = g_str_has_suffix(url_base_filename, ".pdf");
 
     // Cast the given URI to an argument, which uses aria2c to safely
     // and rapidly download files from the download request.
@@ -1555,7 +1518,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     arg.v = (const char*[]){"/usr/bin/aria2c",
                             (debug_mode) ? "--quiet=false" : "--quiet=true",
                             "-d",
-                            downloads_location,
+                            (isPDF) ? tmp_location : downloads_location,
                             "-o",
                             url_base_filename,
                             "--stderr=false",
@@ -1583,111 +1546,13 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         print_debug("initdownload() --> Attempting to spawn new process.\n");
     }
 
-    // Memory check, if the `c->download_location_label` variable exists and
-    // has been previously defined, clear it away.
-    if (c->download_location_label != NULL) {
-
-        // If debug, tell the developer this program needs to clear memory
-        // in order to make space for the new download location label.
-        print_debug("initdownload() --> Freeing memory used by the "
-                    "following GTK modal object: "
-                    "c->download_location_label.\n");
-
-        // Since the dialog no longer exists, this needs to clean up the
-        // memory assigned via the previous label generation.
-        gtk_widget_destroy(c->download_location_label);
-        c->download_location_label = NULL;
-        print_debug("initdownload() --> freed c->download_location_label\n");
-    }
-
     // If we got this far, then tell the end-user that the download command
     // accomplished via exec(aria2c) has been backgrounded. As well, state
     // the location of where the file is being downloaded to.
-
-    // Attempt to set a GtkEntry to allow the end-user to input an URL.
-    c->download_location_label = gtk_label_new(download_file_path);
-
-    // Sanity check, make sure this actually returned a new input box.
-    if (!c->download_location_label) {
-        print_debug("initdownload() --> Unable to assign memory for the "
-                    "download location label.\n");
+    err = displayMiniGTKPopup(c, url_base_filename, isPDF);
+    if (err != NULL) {
+        print_debug(err);
         return false;
-    }
-
-    // Set the maximum length of the input box to 100 characters.
-    gtk_label_set_width_chars(GTK_LABEL(c->download_location_label), 80);
-
-    // Attempt to set the requested size of the input_box entry widget
-    gtk_widget_set_size_request(c->download_location_label, 680, 30);
-
-    // Generate a new dialog for the download location pop-up, along with
-    // flags to tell the OS this is a model dialog that is autodestroyed
-    // once the parent is closed.
-    c->dialog = gtk_dialog_new_with_buttons("Download queued and sent to "
-      "the following location:",
-      GTK_WINDOW(c->win),
-      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-      NULL,
-      NULL);
-
-    // Sanity check, make sure this actually generated a dialog.
-    if (!c->dialog) {
-
-        // If debug, tell the developer this program failed to assign
-        // memory for the GTK modal dialog.
-        print_debug("initdownload() --> Unable to assign memory for the "
-                    "GTK modal object: c->dialog.\n");
-
-        // Since the dialog no longer exists, this needs to clean up the
-        // memory assigned via the previous label generation.
-        gtk_widget_destroy(c->download_location_label);
-        c->download_location_label = NULL;
-        print_debug("initdownload() --> freed c->download_location_label\n");
-
-        // Return false, which continues the callback.
-        return false;
-    }
-
-    // Grab the GtkBox from the content area of the GtkDialog.
-    box_content = gtk_dialog_get_content_area(GTK_DIALOG(c->dialog));
-
-    // Sanity check, make sure this actually was able to find a GtkBox.
-    if (!box_content) {
-
-        // Tell the developer exactly what happened.
-        print_debug("initdownload() --> Unable to access the content area "
-                    "of the GtkDialog object: c->dialog\n");
-
-        // Clean up any memory assigned to the dialog object, if it still
-        // exists and is defined.
-        if (c->dialog) {
-            gtk_widget_destroy(c->dialog);
-            c->dialog = NULL;
-            print_debug("initdownload() --> freed c->dialog memory\n");
-        }
-
-        // Since the dialog no longer exists, this needs to clean up the
-        // memory assigned.
-        gtk_widget_destroy(c->download_location_label);
-        c->download_location_label = NULL;
-        print_debug("initdownload() --> freed c->download_location_label\n");
-
-        // Return false, which continues the callback.
-        return false;
-    }
-
-    // Add the download_location_label to the content area of the dialog.
-    gtk_container_add(GTK_CONTAINER(box_content), c->download_location_label);
-
-    // Since we actually got a valid dialog, go ahead and display it.
-    gtk_widget_show(c->download_location_label);
-    gtk_widget_show(c->dialog);
-
-    // Blast the download file path away since we're done with it.
-    if (download_file_path) {
-        print_debug("initdownload() --> Freeing download_file_path "
-          "string.\n");
-        free(download_file_path);
     }
 
     // Fork this process to get wget via WebKit to download the requested file.
@@ -1737,7 +1602,7 @@ void inspector(Client *c, const Arg *arg)
 //! Register an action once a key has been pressed.
 /*!
  * @param   GtkAccelGroup     key click group
- * @param   GObject           callback pointer 
+ * @param   GObject           callback pointer
  * @param   unsigned int      keyboard key pressed
  * @param   GdkModifierType   if the <alt>, <ctrl>, <shift>, etc was pressed
  * @param   Client            current client
@@ -1808,7 +1673,7 @@ void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
     // program knows the latest hit that occurred.
     c->hit_test_result = hit_test_result;
 
-    // If the user has not hovered over a hyperlink, simply restore the 
+    // If the user has not hovered over a hyperlink, simply restore the
     // original title to the browser window.
     if (!webkit_hit_test_result_context_is_link(hit_test_result)) {
         free(c->linkhover);
@@ -1832,7 +1697,7 @@ void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
         c->linkhover = NULL;
         updatetitle(c);
         return;
-    } 
+    }
 
     // Attempt to grab the URI of the given hyperlink.
     c->linkhover = assign_to_str(&c->linkhover, link_uri);
@@ -1899,7 +1764,7 @@ void loadstatuschange(WebKitWebView *view, WebKitLoadEvent *e, Client *c)
         return;
     }
 
-    // If the page has completely loaded... 
+    // If the page has completely loaded...
     if (webkit_web_view_get_estimated_load_progress(c->view) > 0.99) {
 
         // Tell the client that progress is complete.
@@ -1915,7 +1780,7 @@ void loadstatuschange(WebKitWebView *view, WebKitLoadEvent *e, Client *c)
         // All done here.
         print_debug("loadstatuschange() --> Page load completed.\n");
         return;
-    } 
+    }
 
     // If the page is currently being loaded... grab the current web address
     // and assign to the client's title URI.
@@ -2001,7 +1866,7 @@ void loaduri(Client *c, const char *uri)
         // This now done.
         return;
     }
- 
+
     // Otherwise we can safely proceed to the destination.
     webkit_web_view_load_uri(c->view, u);
     c->progress = 0;
@@ -2043,10 +1908,10 @@ void navigate(Client *c, const Arg *arg)
     }
 
     // If negative, we move go back to the previous page.
-    if ((steps < 0) && webkit_web_view_can_go_back(c->view)) { 
+    if ((steps < 0) && webkit_web_view_can_go_back(c->view)) {
         webkit_web_view_go_back(c->view);
         return;
-    } 
+    }
 
     // Otherwise we do nothing and simply return from here.
     return;
@@ -2088,7 +1953,7 @@ Client* newclient(void)
     // Define the window class and role, in this case use the program name.
     gtk_window_set_title(GTK_WINDOW(c->win), "sighte");
     gtk_window_set_role(GTK_WINDOW(c->win), "Sighte");
-    
+
     // Set the default size of the new window.
     gtk_window_set_default_size(GTK_WINDOW(c->win),
                                 browser_window_starting_height,
@@ -2109,7 +1974,7 @@ Client* newclient(void)
 
     // Pane
     c->pane = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
-    
+
     // Sanity check, make sure this got a new GTK Pane object.
     if (!c->pane) {
         return NULL;
@@ -2117,7 +1982,7 @@ Client* newclient(void)
 
     // Set our current webview via the necessary WebKit object.
     c->view = WEBKIT_WEB_VIEW(webkit_web_view_new());
-    
+
     // Sanity check, make sure this got a new WebKitView object.
     if (!c->view) {
         return NULL;
@@ -2204,7 +2069,7 @@ Client* newclient(void)
                      G_CALLBACK(titlechange),
                      c);
 
-    // In the event our hovers over an hyperlink, we need to assign the 
+    // In the event our hovers over an hyperlink, we need to assign the
     // proper callback function for it.
     g_signal_connect(G_OBJECT(c->view),
                      "mouse-target-changed",
@@ -2305,13 +2170,13 @@ Client* newclient(void)
     // Set the events group filter.
     gdk_window_set_events(gtk_widget_get_window(GTK_WIDGET(c->win)),
       GDK_ALL_EVENTS_MASK);
- 
+
     // Evaluate our frame using the scripts.js file in our cache.
     runscript(c);
 
     // Grab the list of WebKit settings.
     settings = webkit_web_view_get_settings(c->view);
-    
+
     // Set it to zoom using all content, rather than simply text.
     webkit_settings_set_zoom_text_only(settings, true);
 
@@ -2368,7 +2233,7 @@ Client* newclient(void)
 
     // If styles are enabled, then attempt to set the style.
     if (enablestyle) {
-        setstyle(c, getstyle("about:blank"));
+        setstyle(c, getstyle(geturi(c)));
     }
 
     // Set the intended zoom level for the specific page, assuming it
@@ -2457,7 +2322,7 @@ void newwindow(Client *c)
         cmd[i++] = "-s";
     }
 
-    // Whether or not to display the Xwindow ID. 
+    // Whether or not to display the Xwindow ID.
     if (showxid) {
         cmd[i++] = "-x";
     }
@@ -2487,7 +2352,7 @@ void newwindow(Client *c)
  * @param   WebKitWebView         given web view
  * @param   WebKitContextMenu     left-click menu object
  * @param   WebKitHitTestResult   pointer to the clicked target
- * @param   GdkEvent              triggering event 
+ * @param   GdkEvent              triggering event
  * @param   Client                current client
  *
  * @return  bool                  always false as per the callback usage
@@ -2611,7 +2476,7 @@ void progresschange(WebKitWebView *view, GParamSpec *pspec, Client *c)
     c->progress
       = (int) (webkit_web_view_get_estimated_load_progress(c->view) * 100.0);
 
-    // Update the given title. 
+    // Update the given title.
     updatetitle(c);
 
     // This is now done.
@@ -2839,8 +2704,8 @@ void opendialog(Client *c, const Arg *arg)
 
     // Check if a pre-existing dialog window is open.
     if (c->dialog) {
-   
-        // Hide the current dialog. 
+
+        // Hide the current dialog.
         gtk_widget_hide(c->dialog);
 
         // Since it's using memory, it needs to be freed.
@@ -2899,7 +2764,7 @@ void opendialog(Client *c, const Arg *arg)
           NULL,
           NULL);
         c->dialog_action = DIALOG_ACTION_FIND;
-    } 
+    }
 
     // Sanity check, make sure we could actually generate a dialog.
     if (!c->dialog) {
@@ -2995,7 +2860,7 @@ bool handle_dialog_keypress(GtkWidget *w, GdkEventKey *e, Client *c)
             // Set the find atom.
             c->text_to_search_for = input_box_text;
 
-            // Set an argument stating that we want to search forwards. 
+            // Set an argument stating that we want to search forwards.
             const Arg a = { .b = true };
 
             // Call the find command.
@@ -3004,7 +2869,7 @@ bool handle_dialog_keypress(GtkWidget *w, GdkEventKey *e, Client *c)
 
         // Hide the widget since it has done its task.
         gtk_widget_hide(c->dialog);
- 
+
         // With the event completed, send the true value back.
         return true;
     }
@@ -3106,7 +2971,7 @@ void toggle(Client *c, const Arg *arg)
     Arg a      = { .b = FALSE };
 
     // Grab the value of our requested setting.
-    g_object_get(G_OBJECT(settings), 
+    g_object_get(G_OBJECT(settings),
                  name,
                  &value,
                  NULL);
@@ -3141,7 +3006,7 @@ void togglecookiepolicy(Client *c, const Arg *arg)
         return;
     }
 
-    // Variable declaration    
+    // Variable declaration
     SoupCookieJarAcceptPolicy policy;
 
     // Get the current cookie jar.
@@ -3196,8 +3061,8 @@ void togglegeolocation(Client *c, const Arg *arg)
 //! Toggle CSS styles on or off.
 /*!
  * @param    Client   current client
- * @param    Arg      given list of arguments 
- * 
+ * @param    Arg      given list of arguments
+ *
  * @return   none
  */
 void togglestyle(Client *c, const Arg *arg)
@@ -3208,7 +3073,7 @@ void togglestyle(Client *c, const Arg *arg)
     // Switch between style modes.
     enablestyle = !enablestyle;
 
-    // If we have switched to enabled, then go ahead and use it! 
+    // If we have switched to enabled, then go ahead and use it!
     setstyle(c, enablestyle ? getstyle(geturi(c)) : "");
 
     // Adjust the browser title
@@ -3272,7 +3137,7 @@ void updatetitle(Client *c)
     return;
 }
 
-//! Print out our usage information. 
+//! Print out our usage information.
 /*!
  *  @return  none
  */
@@ -3306,11 +3171,11 @@ bool web_process_crashed_callback(WebKitWebView *v, const Arg *arg)
     return true;
 }
 
-//! Adjust the current zoom level. 
+//! Adjust the current zoom level.
 /*!
- * @param   Client   current client 
+ * @param   Client   current client
  * @param   Arg      given list of arguments.
- * 
+ *
  * @return  none
  */
 void zoom(Client *c, const Arg *arg)
@@ -3346,6 +3211,130 @@ void zoom(Client *c, const Arg *arg)
     return;
 }
 
+//! Displays a helpful GTK pop-up with the given label text.
+/*
+ * @param    Client*    pointer to given web Client
+ * @param    string     label text
+ * @param    bool       whether or not the end-user attempt to open a PDF
+ *
+ * @return   string     error message, if any
+ */
+const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
+
+    // input validation
+    if (!labelText || strlen(labelText) < 1) {
+        return NULL;
+    }
+
+    // variable declaration
+    GtkWidget *box_content = NULL;
+    const char *feedbackText = NULL;
+    char *assembledLabel = NULL;
+
+    if (isPDF) {
+        feedbackText = "The following PDF was sent to evince:";
+    } else {
+        feedbackText = "Download queued and sent to the following"
+                       "location:";
+    }
+
+    // Memory check, if the `c->download_location_label` variable exists and
+    // has been previously defined, clear it away.
+    if (c->download_location_label != NULL) {
+
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+
+        print_debug("displayMiniGTKPopup() --> freed "
+                    "c->download_location_label\n");
+    }
+
+    if (isPDF) {
+        assembledLabel = g_build_filename(tmp_location,
+                                          labelText,
+                                          NULL);
+    } else {
+        assembledLabel = g_build_filename(downloads_location,
+                                          labelText,
+                                          NULL);
+    }
+
+    // Sanity check, make sure this actually returned a new input box.
+    c->download_location_label = gtk_label_new(assembledLabel);
+    if (!c->download_location_label) {
+        return "displayMiniGTKPopup() --> Unable to assign memory for the "
+               "download location label.\n";
+    }
+
+    // Set input-box widget to the following:
+    //
+    // * max capacity of 80 UTF-8 characters
+    // * height of 30 pixels
+    // * width of 680 pixels
+    //
+    gtk_label_set_width_chars(GTK_LABEL(c->download_location_label), 80);
+    gtk_widget_set_size_request(c->download_location_label, 680, 30);
+
+    // Generate a new dialog for the download location pop-up, along with
+    // flags to tell the OS this is a model dialog that is autodestroyed
+    // once the parent is closed.
+    c->dialog = gtk_dialog_new_with_buttons(feedbackText,
+      GTK_WINDOW(c->win),
+      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+      NULL,
+      NULL);
+
+    // Sanity check, make sure this actually generated a dialog.
+    if (!c->dialog) {
+
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+
+        return "displayMiniGTKPopup() --> Unable to assign memory for the "
+               "GTK modal object: c->dialog.\n";
+    }
+
+    // Grab the GtkBox from the content area of the GtkDialog.
+    box_content = gtk_dialog_get_content_area(GTK_DIALOG(c->dialog));
+
+    // Sanity check, make sure this actually was able to find a GtkBox.
+    if (!box_content) {
+
+        // Clean up any memory assigned to the dialog object, if it still
+        // exists and is defined.
+        if (c->dialog) {
+            gtk_widget_destroy(c->dialog);
+            c->dialog = NULL;
+            print_debug("displayMiniGTKPopup() --> freed c->dialog memory\n");
+        }
+
+        // Since the dialog no longer exists, this needs to clean up the
+        // memory assigned.
+        gtk_widget_destroy(c->download_location_label);
+        c->download_location_label = NULL;
+        print_debug("displayMiniGTKPopup() --> freed "
+                    "c->download_location_label\n");
+
+        // Return false, which continues the callback.
+        return "displayMiniGTKPopup() --> Unable to access the content area "
+               "of the GtkDialog object: c->dialog\n";
+    }
+
+    // Add the download_location_label to the content area of the dialog.
+    gtk_container_add(GTK_CONTAINER(box_content), c->download_location_label);
+
+    // Since we actually got a valid dialog, go ahead and display it.
+    gtk_widget_show(c->download_location_label);
+    gtk_widget_show(c->dialog);
+
+    if (assembledLabel) {
+        print_debug("displayMiniGTKPopup() --> freeing label\n");
+        free(assembledLabel);
+    }
+
+    return NULL;
+}
+
 //
 // PROGRAM MAIN
 //
@@ -3367,7 +3356,7 @@ int main(int argc, char *argv[])
     Client *c;
 
     // Check for each of our command line arguments.
-    for (argv0 = *argv, argv++, argc--; 
+    for (argv0 = *argv, argv++, argc--;
       argv[0] && argv[0][1] && argv[0][0] == '-'; argc--, argv++) {
 
         // Useful flag-argument variables.
@@ -3487,7 +3476,7 @@ int main(int argc, char *argv[])
             // Otherwise default to just printing the usage data.
             default:
                 usage();
-            } 
+            }
         }
         (void) _argc;
     }
@@ -3497,7 +3486,7 @@ int main(int argc, char *argv[])
     // Prepare our browser.
     setup();
 
-    // Initialize a new browser client. 
+    // Initialize a new browser client.
     c = newclient();
 
     // Sanity check, make sure this could actually make a client.
