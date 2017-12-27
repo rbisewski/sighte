@@ -51,6 +51,7 @@ static const char *cookiepolicies = "Aa@";
 
 // Downloaded files location
 static const char *downloads_location = "~/";
+static const char *tmp_location = "/tmp/";
 
 // Certificate variables
 static const char *cafile = "/etc/ssl/certs/ca-certificates.crt";
