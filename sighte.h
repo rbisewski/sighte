@@ -342,6 +342,19 @@ bool decidepolicy(WebKitWebView*, WebKitPolicyDecision *,
  */
 void destroyclient(GtkWidget*, Client*);
 
+//! Displays a helpful GTK pop-up with the given label text.
+/*
+ * @param    Client*    pointer to given web Client
+ * @param    string     label text
+ * @param    bool       whether or not the end-user attempt to open a PDF
+ *
+ * @return   string     error message, if any
+ *
+ * TODO: implement PDF reader auto-open functionality at some time in the
+ *       future; right now all it does is download them to /tmp/
+ */
+const char* displayMiniGTKPopup(Client*, char*, bool);
+
 //! Terminate the program with a given error message to stderr.
 /*!
  * @param    string   error message to stderr
