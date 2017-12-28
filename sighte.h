@@ -578,6 +578,15 @@ void progresschange(WebKitWebView*, GParamSpec*, Client*);
  */
 void linkopen(Client*, const Arg*);
 
+//! Use xdg-open to access the system-default PDF reader, if any
+/*
+ * @param     string    /path/to/tmp/directory
+ * @param     string    filename
+ *
+ * @return    string    error message, if any
+ */
+const char* queueOpenPDF(const char*, char*);
+
 //! Reload the current page
 /*!
  * @param   Client   current client
