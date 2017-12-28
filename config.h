@@ -50,8 +50,9 @@ static const char *cookiefile     = CACHE_DATA_PATH"/cookies.txt";
 static const char *cookiepolicies = "Aa@";
 
 // Downloaded files location
-static const char *downloads_location = "~/";
-static const char *tmp_location = "/tmp/";
+static const char* downloads_location = "~/";
+static const char* tmp_location = "/tmp/";
+static const char* read_lock = ".aria2";
 
 // Certificate variables
 static const char *cafile = "/etc/ssl/certs/ca-certificates.crt";
