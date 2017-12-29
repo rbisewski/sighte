@@ -3377,14 +3377,14 @@ const char* queueOpenPDF(const char* location, char* filename) {
     // variable declaration
     char* path = NULL;
     char* read_lock_path = NULL;
-    const char* xdg_open_path = "/bin/xdg-open";
+    char xdg_open_path[] = "/bin/xdg-open";
 
     path = g_build_filename(location, filename, NULL);
     if (!path) {
         return "queuePDF() --> Unable to build file path.";
     }
 
-    const void *list = (const char *[]){xdg_open_path, path, NULL};
+    char *const list[] = {(char*) xdg_open_path, path, NULL};
 
     // If debug, tell the end-user that the process has been successfully
     // forked since subprocesses will return 0.
@@ -3412,11 +3412,11 @@ const char* queueOpenPDF(const char* location, char* filename) {
 
     // Attempt to execute our given arguments.
     print_debug("queueOpenPDF() --> Executing...\n");
-    execvp(xdg_open_path, (char* const*) list);
+    execvp(list[0], list);
 
     // If this process is still hanging on, then probably we should inform
     // the end user that something horrible has happened.
-    fprintf(stderr, "sighte: execvp %s", xdg_open_path);
+    fprintf(stderr, "sighte: execvp %s", list[0]);
     perror(" failed");
 
     // Afterwards free the temporary strings
