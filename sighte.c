@@ -427,18 +427,21 @@ bool input_listener(WebKitWebView *web, GdkEventButton *e, Client *c)
 
     // Retrieve the URI of the link...
     if (webkit_hit_test_result_context_is_link(c->hit_test_result)) {
+
         arg.v = (const void*)
-          webkit_hit_test_result_get_link_uri(c->hit_test_result);
+        webkit_hit_test_result_get_link_uri(c->hit_test_result);
 
     // ...or the URI of image...
     } else if (webkit_hit_test_result_context_is_image(c->hit_test_result)) {
+
         arg.v = (const void*)
-          webkit_hit_test_result_get_image_uri(c->hit_test_result);
+        webkit_hit_test_result_get_image_uri(c->hit_test_result);
 
     // ...or the URI of the media request.
     } else if (webkit_hit_test_result_context_is_media(c->hit_test_result)) {
+
         arg.v = (const void*)
-          webkit_hit_test_result_get_media_uri(c->hit_test_result);
+        webkit_hit_test_result_get_media_uri(c->hit_test_result);
     }
 
     // Sanity check, make sure we got back a link.
@@ -1599,15 +1602,12 @@ void inspector(Client *c, const Arg *arg)
         return;
     }
 
-    // Check whether or not the inspector is open, and then open/close
-    // it accordingly based on what the end user is doing.
     if (c->isinspecting) {
         webkit_web_inspector_close(c->inspector);
     } else {
         webkit_web_inspector_show(c->inspector);
     }
 
-    // Return from here.
     return;
 }
 
@@ -1716,8 +1716,6 @@ void mousetargetchanged(WebKitWebView *v, WebKitHitTestResult *hit_test_result,
 
     // Update the title
     updatetitle(c);
-
-    // All ends well.
     return;
 }
 
@@ -1910,22 +1908,16 @@ void navigate(Client *c, const Arg *arg)
     if (steps == 0) {
         loaduri(c, default_home_page);
         updatetitle(c);
-        return;
-    }
 
     // If positive, we move on the next page forward.
-    if ((steps > 0) && webkit_web_view_can_go_forward(c->view)) {
+    } else if ((steps > 0) && webkit_web_view_can_go_forward(c->view)) {
         webkit_web_view_go_forward(c->view);
-        return;
-    }
 
     // If negative, we move go back to the previous page.
-    if ((steps < 0) && webkit_web_view_can_go_back(c->view)) {
+    } else if ((steps < 0) && webkit_web_view_can_go_back(c->view)) {
         webkit_web_view_go_back(c->view);
-        return;
     }
 
-    // Otherwise we do nothing and simply return from here.
     return;
 }
 
@@ -2621,7 +2613,8 @@ void setup(void)
     if ((proxy = getenv("http_proxy")) && strcmp(proxy, "")) {
 
         // Format the URI based on how the request was handled.
-        new_proxy = g_strrstr(proxy, "http://") || g_strrstr(proxy, "https://")
+        new_proxy = g_strrstr(proxy, "http://")
+                    || g_strrstr(proxy, "https://")
                     || g_strrstr(proxy, "socks://")
                     || g_strrstr(proxy, "socks4://")
                     || g_strrstr(proxy, "socks4a://")
@@ -2836,58 +2829,57 @@ bool handle_dialog_keypress(GtkWidget *w, GdkEventKey *e, Client *c)
 
     // If anything else other than the Enter key was pressed, terminate the
     // callback as nothing needs to be done in those situations.
-    if (e->keyval == GDK_KEY_Return) {
-
-        // Sanity check, make sure this still has an input box.
-        if (!w) {
-
-            // Since nothing is present, hide the dialog and continue on.
-            gtk_widget_hide(c->dialog);
-            return false;
-        }
-
-        // Attempt to grab the new requested URL from the input box text.
-        input_box_text = gtk_entry_get_text(GTK_ENTRY(w));
-
-        // Check if the user has entered text into the input box.
-        if (!input_box_text || !strlen(input_box_text)) {
-
-            // Since nothing is present, hide the dialog and continue on.
-            gtk_widget_hide(c->dialog);
-            return false;
-        }
-
-        // If this is a go dialog action, when we need to adjust the URI.
-        if (c->dialog_action == DIALOG_ACTION_GO) {
-
-            // Dump the URL into an argument so it can be passed back.
-            //const Arg a = { .v = (void *) input_box_text };
-
-            // Attempt to load the requested URL.
-            loaduri(c, input_box_text);
-
-        // If this is a find dialog action, then we must search for text.
-        } else if (c->dialog_action == DIALOG_ACTION_FIND) {
-
-            // Set the find atom.
-            c->text_to_search_for = input_box_text;
-
-            // Set an argument stating that we want to search forwards.
-            const Arg a = { .b = true };
-
-            // Call the find command.
-            find(c, &a);
-        }
-
-        // Hide the widget since it has done its task.
-        gtk_widget_hide(c->dialog);
-
-        // With the event completed, send the true value back.
-        return true;
+    if (e->keyval != GDK_KEY_Return) {
+        return false;
     }
 
-    // Other key values can simply retain their usual input response.
-    return false;
+    //
+    // User pressed the Enter key
+    //
+
+    // Sanity check, make sure this still has an input box.
+    if (!w) {
+
+        // Since nothing is present, hide the dialog and continue on.
+        gtk_widget_hide(c->dialog);
+        return false;
+    }
+
+    // Attempt to grab the new requested URL from the input box text.
+    input_box_text = gtk_entry_get_text(GTK_ENTRY(w));
+
+    // Check if the user has entered text into the input box.
+    if (!input_box_text || !strlen(input_box_text)) {
+
+        // Since nothing is present, hide the dialog and continue on.
+        gtk_widget_hide(c->dialog);
+        return false;
+    }
+
+    // If this is a go dialog action, when we need to adjust the URI.
+    if (c->dialog_action == DIALOG_ACTION_GO) {
+
+        // Attempt to load the requested URL.
+        loaduri(c, input_box_text);
+
+    // If this is a find dialog action, then we must search for text.
+    } else if (c->dialog_action == DIALOG_ACTION_FIND) {
+
+        // Set the find atom.
+        c->text_to_search_for = input_box_text;
+
+        // Set an argument stating that we want to search forwards.
+        const Arg a = { .b = true };
+
+        // Call the find command.
+        find(c, &a);
+    }
+
+    // Hide the widget since it has done its task.
+    gtk_widget_hide(c->dialog);
+
+    // With the event completed, send the true value back.
+    return true;
 }
 
 //! Call to stop loading a given page.
@@ -3142,10 +3134,8 @@ void updatetitle(Client *c)
     // window to the value stored in the string t.
     gtk_window_set_title(GTK_WINDOW(c->win), t);
 
-    // With our string now passed forward, clean away our current tmp string.
+    // Cleanup and return
     free(t);
-
-    // Is it set? It is safe?
     return;
 }
 
@@ -3608,13 +3598,8 @@ int main(int argc, char *argv[])
     print_debug("main() --> Converging to GTK main loop.\n");
     gtk_main();
 
-    // Having finished the task at hand, the above statement should return
-    // back here after converging and completed.
+    // if deconverged from GTK main then clean up our globals and exit...
     print_debug("main() --> Deconverged successfully from GTK main loop.\n");
-
-    // Clean up our globals.
     cleanup();
-
-    // If all when well, we can simply exit peacefully
     return 0;
 }
