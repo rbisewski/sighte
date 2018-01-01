@@ -1439,9 +1439,6 @@ void setstyle(Client *c, const char *style)
  * @param    Client           current client
  *
  * @return   bool             only false since we want to return zero.
- *
- * TODO: implement PDF reader auto-open functionality at some time in the
- *       future; right now all it does is download them to /tmp/
  */
 bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 {
@@ -3367,22 +3364,23 @@ const char* queueOpenPDF(const char* location, char* filename) {
         return NULL;
     }
 
-    // variable declaration
-    char* path = NULL;
-    char* read_lock_path = NULL;
-    char xdg_open_path[] = "/bin/xdg-open";
-
-    path = g_build_filename(location, filename, NULL);
-    if (!path) {
-        return "queuePDF() --> Unable to build file path.";
-    }
-
-    char *const list[] = {(char*) xdg_open_path, path, NULL};
-
     // If debug, tell the end-user that the process has been successfully
     // forked since subprocesses will return 0.
     print_debug("queueOpenPDF() -- > fork() has returned a zero value "
                 "here. So a new process has been generated here.\n");
+
+    // variable declaration
+    char* path = NULL;
+    char read_lock_path[256] = {0};
+    char xdg_open_path[] = "/bin/xdg-open";
+    int result = 0;
+
+    path = g_build_filename(location, filename, NULL);
+    if (!path) {
+        return "queueOpenPDF() --> Unable to build file path.";
+    }
+
+    char *const list[] = {(char*) xdg_open_path, path, NULL};
 
     // If we have a pre-existing display open, then close it.
     if (dpy) {
@@ -3390,14 +3388,16 @@ const char* queueOpenPDF(const char* location, char* filename) {
         close(ConnectionNumber(dpy));
     }
 
-    // TODO: fix this
     // build a read lock and then wait until it is finished
-    read_lock_path = g_build_filename(location, filename, read_lock, NULL);
-    if (!read_lock_path) {
-        return "queuePDF() --> Unable to build read lock.";
+    result = sprintf(read_lock_path, "%s/%s%s", location, filename,
+      read_lock);
+    if (result < 1) {
+        return "queueOpenPDF() --> Unable to build read lock.";
     }
-    while (access(read_lock_path, F_OK) != -1) {
-    }
+
+    // wait a brief moment before openning the document in question
+    sleep(2);
+    while (access(read_lock_path, F_OK) == 0);
 
     // Set the sid.
     print_debug("queueOpenPDF() --> Setting sid value.\n");
