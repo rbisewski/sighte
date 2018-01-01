@@ -7,12 +7,12 @@
 #include "sighte.h"
 
 // Global Variables
-char* argv0;
 SoupSession *default_soup_session;
 Display *dpy;
 Window win;
 Client *clients      = NULL;
 bool showxid         = false;
+char* url            = NULL;
 bool usingproxy      = 0;
 GTlsDatabase *tlsdb  = NULL;
 int policysel        = 0;
@@ -2300,7 +2300,7 @@ void newwindow(Client *c)
     const Arg a = { .v = (void *)cmd };
 
     // Append our program name.
-    cmd[i++] = argv0;
+    cmd[i++] = "sighte";
 
     // Define our cookie policies
     cmd[i++] = "-a";
@@ -2341,6 +2341,7 @@ void newwindow(Client *c)
     if (c && c->linkhover && strlen(c->linkhover)) {
         print_debug("newwindow() --> Target requested the following URI: "
           "%s\n", c->linkhover);
+        cmd[i++] = "-u";
         cmd[i++] = c->linkhover;
     }
 
@@ -3146,7 +3147,8 @@ void updatetitle(Client *c)
 void usage(void)
 {
     terminate("usage: sighte [-DfFgGiImMpPsSvx] [-a cookiepolicies ] "
-      "[-c cookiefile] [-r scriptfile] [-t stylefile] [-z zoomlevel] [uri]\n");
+      "[-c cookiefile] [-r scriptfile] [-t stylefile] [-u url] "
+      "[-z zoomlevel]\n");
 }
 
 //! Callback for when a webview is given a "web-process-crashed" signal.
@@ -3436,136 +3438,128 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Variable declaration
+    // variable declaration
     Client *c;
+    int opt = 0;
 
-    // Check for each of our command line arguments.
-    for (argv0 = *argv, argv++, argc--;
-      argv[0] && argv[0][1] && argv[0][0] == '-'; argc--, argv++) {
+    // cycle thru the arguments
+    while ((opt = getopt(argc, argv, "a:dDfFgGiImMpPr:sSt:u:vxz")) != -1) {
 
-        // Useful flag-argument variables.
-        char _argc;
-        char **_argv;
+        // Switch thru the various possibilities.
+        switch (opt) {
 
-        // If we get a - char without a proper char, end here.
-        if (argv[0][1] == '-' && argv[0][2] == '\0') {
-            argv++;
-            argc--;
-            break;
-        }
-
-        // Otherwise we likely have a valid flag, so enter another loop where
-        // each of the choices can be evaluated
-        for (argv[0]++, _argv = argv; argv[0][0]; argv[0]++) {
-
-            // If current does not match the expected, then we need to get out
-            // of this loop since something horrible has happened.
-            if (_argv != argv) {
-                break;
-            }
-
-            // With that in mind, grab the latest argument.
-            _argc = argv[0][0];
-
-            // Switch thru the various possibilities.
-            switch (_argc) {
-
-            // Set a specific cookie policy, see config.h for more details.
-            case 'a':
-                cookiepolicies = EARGF(usage());
-                break;
-
-            // Enable or disabled disk caching
-            case 'd':
-                enablediskcache = 0;
-                break;
-            case 'D':
-                enablediskcache = 1;
-                break;
-
-            // Start in normal / full screen mode
-            case 'f':
-                runinfullscreen = 0;
-                break;
-            case 'F':
-                runinfullscreen = 1;
-                break;
-
-            // Enable / disabled geolocation permissions
-            case 'g':
-                allowgeolocation = 0;
-                break;
-            case 'G':
-                allowgeolocation = 1;
-                break;
-
-            // Enable / disable images
-            case 'i':
-                loadimages = 0;
-                break;
-            case 'I':
-                loadimages = 1;
-                break;
-
-            // Enabled / disable CSS3 styles
-            case 'm':
-                enablestyle = 0;
-                break;
-            case 'M':
-                enablestyle = 1;
-                break;
-
-            // Enable or disable browser plugins
-            case 'p':
-                enableplugins = 0;
-                break;
-            case 'P':
-                enableplugins = 1;
-                break;
-
-            // Set a user specified script file
-            case 'r':
-                scriptfile = EARGF(usage());
-                break;
-
-            // Enable or disable scripts
-            case 's':
-                enablescripts = 0;
-                break;
-            case 'S':
-                enablescripts = 1;
-                break;
-
-            // Set a predefined user style file
-            case 't':
-                stylefile = EARGF(usage());
-                break;
-
-            // Version
-            case 'v':
-                terminate("sighte-"VERSION", "
-                    "Copyright 2017 sighte browser, all rights reserved.\n");
-                break;
-
-            // Show xid
-            case 'x':
-                showxid = TRUE;
-                break;
-
-            // Zoom level
-            case 'z':
-                zoomlevel = strtof(EARGF(usage()), NULL);
-                break;
-
-            // Otherwise default to just printing the usage data.
-            default:
+        // Set a specific cookie policy, see config.h for more details.
+        case 'a':
+            if (!optarg || strlen(optarg) < 1) {
                 usage();
             }
+            cookiepolicies = optarg;
+            break;
+
+        // Enable or disabled disk caching
+        case 'd':
+            enablediskcache = 0;
+            break;
+        case 'D':
+            enablediskcache = 1;
+            break;
+
+        // Start in normal / full screen mode
+        case 'f':
+            runinfullscreen = 0;
+            break;
+        case 'F':
+            runinfullscreen = 1;
+            break;
+
+        // Enable / disabled geolocation permissions
+        case 'g':
+            allowgeolocation = 0;
+            break;
+        case 'G':
+            allowgeolocation = 1;
+            break;
+
+        // Enable / disable images
+        case 'i':
+            loadimages = 0;
+            break;
+        case 'I':
+            loadimages = 1;
+            break;
+
+        // Enabled / disable CSS3 styles
+        case 'm':
+            enablestyle = 0;
+            break;
+        case 'M':
+            enablestyle = 1;
+            break;
+
+        // Enable or disable browser plugins
+        case 'p':
+            enableplugins = 0;
+            break;
+        case 'P':
+            enableplugins = 1;
+            break;
+
+        // Set a user specified script file
+        case 'r':
+            if (!optarg || strlen(optarg) < 1) {
+                usage();
+            }
+            scriptfile = optarg;
+            break;
+
+        // Enable or disable scripts
+        case 's':
+            enablescripts = 0;
+            break;
+        case 'S':
+            enablescripts = 1;
+            break;
+
+        // Set a predefined user style file
+        case 't':
+            if (!optarg || strlen(optarg) < 1) {
+                usage();
+            }
+            stylefile = optarg;
+            break;
+
+        // Set a predefined user style file
+        case 'u':
+            if (!optarg || strlen(optarg) < 1) {
+                usage();
+            }
+            url = optarg;
+            break;
+
+        // Version
+        case 'v':
+            terminate("sighte-"VERSION", "
+                "Copyright 2018 sighte browser, all rights reserved.\n");
+            break;
+
+        // Show xid
+        case 'x':
+            showxid = true;
+            break;
+
+        // Zoom level
+        case 'z':
+            if (!optarg || strlen(optarg) < 1) {
+                usage();
+            }
+            zoomlevel = strtof(optarg, NULL);
+            break;
+
+        // Otherwise default to just printing the usage data.
+        default:
+            usage();
         }
-        (void) _argc;
     }
-    (void) argv;
-    (void) argc;
 
     // Prepare our browser.
     setup();
@@ -3581,10 +3575,10 @@ int main(int argc, char *argv[])
     }
 
     // If given an URI argument, go ahead and use it.
-    if (argc > 0 && argv[0] && strlen(argv[0])) {
+    if (url && strlen(url) > 0) {
         print_debug("main() --> The following URL argument was given: %s\n",
-          argv[0]);
-        loaduri(clients, (char*) argv[0]);
+          url);
+        loaduri(clients, url);
 
     // Otherwise take the browser to the default home page.
     } else {
