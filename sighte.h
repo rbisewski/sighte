@@ -345,9 +345,6 @@ void destroyclient(GtkWidget*, Client*);
  * @param    bool       whether or not the end-user attempt to open a PDF
  *
  * @return   string     error message, if any
- *
- * TODO: implement PDF reader auto-open functionality at some time in the
- *       future; right now all it does is download them to /tmp/
  */
 const char* displayMiniGTKPopup(Client*, char*, bool);
 
@@ -580,8 +577,12 @@ void linkopen(Client*, const Arg*);
  * @param     string    filename
  *
  * @return    string    error message, if any
+ *
+ * TODO: this works decently enough, but perhaps a better method would be
+ *       to store the temp PDFs as /tmp/sighte.timestamp so that it is
+ *       clear that these are being utilized by sighte
  */
-const char* queueOpenPDF(const char*, char*);
+const char* openPDF(const char*, char*);
 
 //! Reload the current page
 /*!

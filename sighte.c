@@ -1563,7 +1563,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         print_debug("initdownload() --> attempting to open the "
                     "following PDF: %s%s\n", tmp_location,
                     url_base_filename);
-        err = queueOpenPDF(tmp_location, url_base_filename);
+        err = openPDF(tmp_location, url_base_filename);
         if (err != NULL) {
             print_debug(err);
         }
@@ -3344,10 +3344,11 @@ const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
  *
  * @return    string    error message, if any
  *
- * TODO: the wait-until-read-lock-is-done feature is failing here,
- *       consider improving this so it actually works
+ * TODO: this works decently enough, but perhaps a better method would be
+ *       to store the temp PDFs as /tmp/sighte.timestamp so that it is
+ *       clear that these are being utilized by sighte
  */
-const char* queueOpenPDF(const char* location, char* filename) {
+const char* openPDF(const char* location, char* filename) {
 
     // input validation
     if (!location || strlen(location) < 1 || !filename
@@ -3357,7 +3358,7 @@ const char* queueOpenPDF(const char* location, char* filename) {
 
     // handle the subprocess properly
     if (fork() != 0) {
-        print_debug("queueOpenPDF() --> fork() has returned a non-zero "
+        print_debug("openPDF() --> fork() has returned a non-zero "
                     "value here, suggesting it is the subprocess. Ergo the "
                     "original process has *probably* passed through here "
                     "intact.\n");
@@ -3366,45 +3367,37 @@ const char* queueOpenPDF(const char* location, char* filename) {
 
     // If debug, tell the end-user that the process has been successfully
     // forked since subprocesses will return 0.
-    print_debug("queueOpenPDF() -- > fork() has returned a zero value "
+    print_debug("openPDF() -- > fork() has returned a zero value "
                 "here. So a new process has been generated here.\n");
 
     // variable declaration
     char* path = NULL;
-    char read_lock_path[256] = {0};
+    char read_lock_path[512] = {0};
     char xdg_open_path[] = "/bin/xdg-open";
     int result = 0;
 
     path = g_build_filename(location, filename, NULL);
-    if (!path) {
-        return "queueOpenPDF() --> Unable to build file path.";
-    }
+    if (!path) exit(1);
 
     char *const list[] = {(char*) xdg_open_path, path, NULL};
 
     // If we have a pre-existing display open, then close it.
-    if (dpy) {
-        print_debug("queueOpenPDF() --> Closing window-manager display.\n");
-        close(ConnectionNumber(dpy));
-    }
+    if (dpy) close(ConnectionNumber(dpy));
 
     // build a read lock and then wait until it is finished
     result = sprintf(read_lock_path, "%s/%s%s", location, filename,
       read_lock);
-    if (result < 1) {
-        return "queueOpenPDF() --> Unable to build read lock.";
-    }
+
+    if (result < 1) exit(1);
 
     // wait a brief moment before openning the document in question
     sleep(2);
     while (access(read_lock_path, F_OK) == 0);
 
     // Set the sid.
-    print_debug("queueOpenPDF() --> Setting sid value.\n");
     setsid();
 
     // Attempt to execute our given arguments.
-    print_debug("queueOpenPDF() --> Executing...\n");
     execvp(list[0], list);
 
     // If this process is still hanging on, then probably we should inform
@@ -3412,10 +3405,7 @@ const char* queueOpenPDF(const char* location, char* filename) {
     fprintf(stderr, "sighte: execvp %s", list[0]);
     perror(" failed");
 
-    // Afterwards free the temporary strings
-    if (path) {
-        free(path);
-    }
+    if (path) free(path);
 
     // Terminate the program.
     exit(0);
