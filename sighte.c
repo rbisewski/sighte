@@ -2303,8 +2303,10 @@ void newwindow(Client *c)
     cmd[i++] = "sighte";
 
     // Define our cookie policies
-    cmd[i++] = "-a";
-    cmd[i++] = cookiepolicies;
+    if (cookiepolicies && strlen(cookiepolicies)) {
+        cmd[i++] = "-a";
+        cmd[i++] = cookiepolicies;
+    }
 
     // Whether or not to allow Geolocation.
     if (!allowgeolocation) {

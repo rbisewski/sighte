@@ -26,10 +26,6 @@
 #include <webkit2/webkit2.h>
 #include <JavaScriptCore/JavaScript.h>
 
-// Argument evaluation macros.
-#define EARGF(x) ((argv[1] == NULL)? ((x), abort(), (char *)0) :\
-		 (argc--, argv++, argv[0]))
-
 // Key and Button related macros.
 #define LENGTH(x)         (sizeof(x) / sizeof(x[0]))
 #define CLEANMASK(mask)   (mask & (GDK_CONTROL_MASK|GDK_SHIFT_MASK))
