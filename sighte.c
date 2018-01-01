@@ -12,7 +12,6 @@ Display *dpy;
 Window win;
 Client *clients      = NULL;
 bool showxid         = false;
-char* url            = NULL;
 bool usingproxy      = 0;
 GTlsDatabase *tlsdb  = NULL;
 int policysel        = 0;
@@ -3443,6 +3442,7 @@ int main(int argc, char *argv[])
     // variable declaration
     Client *c;
     int opt = 0;
+    char* url = NULL;
 
     // cycle thru the arguments
     while ((opt = getopt(argc, argv, "a:dDfFgGiImMpPr:sSt:u:vxz")) != -1) {
