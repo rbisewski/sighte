@@ -7,8 +7,6 @@ project('sighte','c', default_options : ['c_std=c99'])
 # Version
 #
 version_raw = run_command('date','+%y.%m')
-
-# If unable to grab the version, default to N/A
 if version_raw.returncode() != 0
     version_raw = 'n/a'
 endif
@@ -102,16 +100,22 @@ all_deps = [atkdep,
             x11dep]
 
 #
+# Files
+#
+
+files_list = ['sighte.c']
+
+#
 # Executables
 #
-executable('release','sighte.c',
-    c_args : ['-O2', flags, debug_off, verbose_off],
+executable('release', files_list,
+    c_args : ['-O2', '-g0', flags, debug_off, verbose_off],
     dependencies : all_deps)
 
-executable('staging','sighte.c',
+executable('staging', files_list,
     c_args : ['-g', flags, debug_on, verbose_off],
     dependencies : all_deps)
 
-executable('debug','sighte.c',
+executable('debug', files_list,
     c_args : ['-g', flags, debug_on, verbose_on],
     dependencies : all_deps)
