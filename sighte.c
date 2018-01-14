@@ -1548,7 +1548,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     // If we got this far, then tell the end-user that the download command
     // accomplished via exec(aria2c) has been backgrounded. As well, state
     // the location of where the file is being downloaded to.
-    err = displayMiniGTKPopup(c, url_base_filename, isPDF);
+    err = gtkPopup(c, url_base_filename, isPDF);
     if (err != NULL) {
         print_debug(err);
         return false;
@@ -3221,7 +3221,7 @@ void zoom(Client *c, const Arg *arg)
  *
  * @return   string     error message, if any
  */
-const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
+const char* gtkPopup(Client* c, char* labelText, bool isPDF) {
 
     // input validation
     if (!labelText || strlen(labelText) < 1) {
@@ -3247,7 +3247,7 @@ const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
 
-        print_debug("displayMiniGTKPopup() --> freed "
+        print_debug("gtkPopup() --> freed "
                     "c->download_location_label\n");
     }
 
@@ -3264,7 +3264,7 @@ const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
     // Sanity check, make sure this actually returned a new input box.
     c->download_location_label = gtk_label_new(assembledLabel);
     if (!c->download_location_label) {
-        return "displayMiniGTKPopup() --> Unable to assign memory for the "
+        return "gtkPopup() --> Unable to assign memory for the "
                "download location label.\n";
     }
 
@@ -3292,7 +3292,7 @@ const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
 
-        return "displayMiniGTKPopup() --> Unable to assign memory for the "
+        return "gtkPopup() --> Unable to assign memory for the "
                "GTK modal object: c->dialog.\n";
     }
 
@@ -3307,18 +3307,18 @@ const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
         if (c->dialog) {
             gtk_widget_destroy(c->dialog);
             c->dialog = NULL;
-            print_debug("displayMiniGTKPopup() --> freed c->dialog memory\n");
+            print_debug("gtkPopup() --> freed c->dialog memory\n");
         }
 
         // Since the dialog no longer exists, this needs to clean up the
         // memory assigned.
         gtk_widget_destroy(c->download_location_label);
         c->download_location_label = NULL;
-        print_debug("displayMiniGTKPopup() --> freed "
+        print_debug("gtkPopup() --> freed "
                     "c->download_location_label\n");
 
         // Return false, which continues the callback.
-        return "displayMiniGTKPopup() --> Unable to access the content area "
+        return "gtkPopup() --> Unable to access the content area "
                "of the GtkDialog object: c->dialog\n";
     }
 
@@ -3330,7 +3330,7 @@ const char* displayMiniGTKPopup(Client* c, char* labelText, bool isPDF) {
     gtk_widget_show(c->dialog);
 
     if (assembledLabel) {
-        print_debug("displayMiniGTKPopup() --> freeing label\n");
+        print_debug("gtkPopup() --> freeing label\n");
         free(assembledLabel);
     }
 

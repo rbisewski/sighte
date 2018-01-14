@@ -346,7 +346,7 @@ void destroyclient(GtkWidget*, Client*);
  *
  * @return   string     error message, if any
  */
-const char* displayMiniGTKPopup(Client*, char*, bool);
+const char* gtkPopup(Client*, char*, bool);
 
 //! Terminate the program with a given error message to stderr.
 /*!
