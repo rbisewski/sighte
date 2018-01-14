@@ -1,8 +1,7 @@
 #
-# Production project
+# Project
 #
-project('sighte','c',
-    default_options : ['c_std=c99'])
+project('sighte','c', default_options : ['c_std=c99'])
 
 #
 # Version
@@ -18,16 +17,14 @@ version = '-D VERSION="' + version_raw.stdout().strip() + '"'
 #
 # Variables to handle debug modes
 #
-debug_mode_off = 0
-debug_mode_on  = 1
-debug_mode = '-D DEBUG_MODE=0'
+debug_off = '-D DEBUG_MODE=0'
+debug_on  = '-D DEBUG_MODE=1'
 
 #
 # Variables to handle verbose debug output messages modes
 #
-verbose_mode_off = 0
-verbose_mode_on  = 1
-verbose_mode = '-D VERBOSE_MODE=0'
+verbose_off = '-D VERBOSE_MODE=0'
+verbose_on  = '-D VERBOSE_MODE=1'
 
 #
 # C flags
@@ -74,9 +71,7 @@ flags = ['-fpic',
          '-Winvalid-pch',
          '-Wstack-protector',
          '-D_DEFAULT_SOURCE',
-         version,
-         debug_mode,
-         verbose_mode]
+         version]
 
 #
 # Dependencies
@@ -94,18 +89,29 @@ threaddep    = dependency('threads')
 webkit2      = dependency('webkit2gtk-4.0')
 x11dep       = dependency('x11')
 
+all_deps = [atkdep,
+            cairodep,
+            gdkdep,
+            gtkdep,
+            giounixdep,
+            glibdep,
+            pangodep,
+            libsoupdep,
+            threaddep,
+            webkit2,
+            x11dep]
+
 #
-# Executable
+# Executables
 #
-executable('sighte','sighte.c',
-    c_args : flags,
-    dependencies : [atkdep,
-                   cairodep,
-                   gdkdep,
-                   gtkdep,
-                   giounixdep,
-                   glibdep,
-                   pangodep,
-                   libsoupdep,
-                   threaddep,
-                   webkit2])
+executable('release','sighte.c',
+    c_args : ['-O2', flags, debug_off, verbose_off],
+    dependencies : all_deps)
+
+executable('staging','sighte.c',
+    c_args : ['-g', flags, debug_on, verbose_off],
+    dependencies : all_deps)
+
+executable('debug','sighte.c',
+    c_args : ['-g', flags, debug_on, verbose_on],
+    dependencies : all_deps)
