@@ -15,21 +15,21 @@ MANPREFIX = ${PREFIX}/share/man
 
 all: clean release
 
-release:
+mesonify:
 	@meson sighte
+
+release: mesonify
 	@ninja -C ./sighte release
 	@cp ./sighte/release release
 	@rm -rf ./sighte
 	@mv release sighte
 
-staging:
-	@meson sighte
+staging: mesonify
 	@ninja -C ./sighte staging
 	@cp ./sighte/staging staging
 	@rm -rf ./sighte
 
-debug:
-	@meson sighte
+debug: mesonify
 	@ninja -C ./sighte debug
 	@cp ./sighte/debug debug
 	@rm -rf ./sighte
