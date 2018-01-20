@@ -80,9 +80,8 @@ void registerkeystroke(Client *c)
     for (i = 0; i < LENGTH(keys); i++) {
 
         // Assigned a potential connection for our GTK closure object.
-        closure = g_cclosure_new(G_CALLBACK(keypress),
-                                 c,
-                                 (GClosureNotify) destroyclient);
+        closure = g_cclosure_new(G_CALLBACK(keypress), c,
+          (GClosureNotify) destroyclient);
 
         // If we couldn't get a closure, move on to the next.
         if (!closure) {
@@ -1439,6 +1438,8 @@ void setstyle(Client *c, const char *style)
  * @param    Client           current client
  *
  * @return   bool             only false since we want to return zero.
+ *
+ * TODO: conduct further tests to ensure the tmp_filename generator works
  */
 bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
 {
@@ -1452,6 +1453,8 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     char *url_base_filename  = NULL;
     bool isPDF = false;
     const char *err = NULL;
+    char tmp_filename[256] = {0};
+    int bytesWritten = 0;
 
     // Attempt to grab the requested URI from our download.
     WebKitURIRequest *r = webkit_download_get_request(o);
@@ -1487,9 +1490,24 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
         return false;
     }
 
-    // Append the static global downloads_location (see config.h) to the
-    // cURL argument for file output.
-    isPDF = g_str_has_suffix(url_base_filename, ".pdf");
+    // if the URI requested resembles a PDF document...
+    if (g_str_has_suffix(url_base_filename, ".pdf")) {
+
+        // set this flag, which appends the static global downloads_location
+        // (see config.h) to the cURL argument for file output
+        isPDF = true;
+
+        // if this is a PDF, generate a temporary filename
+        bytesWritten = sprintf(tmp_filename, "sighte.%ld.pdf", time(NULL));
+
+        if (bytesWritten < 0) {
+            terminate("Error: Unable to alloc memory for PDF temporary "
+              "file string.");
+        }
+
+        print_debug("initdownload() --> Generated tmp name of... %s\n",
+          &tmp_filename);
+    }
 
     // Cast the given URI to an argument, which uses aria2c to safely
     // and rapidly download files from the download request.
@@ -1519,7 +1537,7 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
                             "-d",
                             (isPDF) ? tmp_location : downloads_location,
                             "-o",
-                            url_base_filename,
+                            (isPDF) ? tmp_filename : url_base_filename,
                             "--stderr=false",
                             "--no-conf=true",
                             "--user-agent",
@@ -1561,9 +1579,8 @@ bool initdownload(WebKitWebView *view, WebKitDownload *o, Client *c)
     if (isPDF) {
 
         print_debug("initdownload() --> attempting to open the "
-                    "following PDF: %s%s\n", tmp_location,
-                    url_base_filename);
-        err = openPDF(tmp_location, url_base_filename);
+                    "following PDF: %s\n", url_base_filename);
+        err = openPDF(tmp_location, tmp_filename);
         if (err != NULL) {
             print_debug(err);
         }
@@ -3343,10 +3360,6 @@ const char* gtkPopup(Client* c, char* labelText, bool isPDF) {
  * @param     string    filename
  *
  * @return    string    error message, if any
- *
- * TODO: this works decently enough, but perhaps a better method would be
- *       to store the temp PDFs as /tmp/sighte.timestamp so that it is
- *       clear that these are being utilized by sighte
  */
 const char* openPDF(const char* location, char* filename) {
 

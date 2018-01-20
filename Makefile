@@ -36,7 +36,7 @@ debug: mesonify
 
 clean:
 	@echo Cleaning away old build...
-	@rm -f debug staging sighte sighte-${VERSION}.tar.gz
+	@rm -rf debug staging sighte sighte-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
