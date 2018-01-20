@@ -138,7 +138,7 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     }
 
     // Debug mode, tell the end-user that a signal was detected.
-    print_debug("prerequest() --> resource-load-started signal"
+    print_debug("prerequest() --> resource-load-started signal "
       "detected. It requested the following URI: %s\n", uri);
 
     // If this browser was given an HTTP request for a .ico file, then
@@ -1077,7 +1077,7 @@ bool decidepolicy(WebKitWebView *view, WebKitPolicyDecision *p,
     if (!n) {
         print_debug("decidepolicy() --> Policy decision "
                     "request is a null HTTP/HTTPS navigation response.\n"
-                    "decidepolicy() --> Terminating due to null response.");
+                    "decidepolicy() --> Terminating due to null response.\n");
         return false;
     }
 
@@ -2653,7 +2653,7 @@ void spawn(const Arg *arg)
 {
     // handle the subprocess properly
     if (fork() != 0) {
-        print_debug("spawn() --> fork() has returned a non-zero value here,"
+        print_debug("spawn() --> fork() has returned a non-zero value here, "
                     "suggesting it is the subprocess. Ergo the original "
                     "process has *probably* passed through here intact.\n");
         return;
