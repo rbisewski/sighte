@@ -42,12 +42,19 @@ wherein the following packages are required:
 * libgtk-3-dev
 * libwebkit2gtk-4.0-37
 * libwebkit2gtk-4.0-dev
+* meson
+
+This browser has also been tested on Ubuntu and Archlinux successfully.
 
 For different distros of the Linux, the package names might vary. Feel free
 to contact me if your distro needs other packages and I will make note of it
 in future versions of this readme.
 
-As a final recourse, I recommend examining the Makefile for more details if
+In order to make building on as many distros as simple as possible, this
+repo contains a Meson script that should attempt to autolocate as many of
+these packages as possible, assuming they are installed on your system.
+
+As a final recourse, I recommend examining the Meson file for more details if
 you are unable to get sighte to properly compile.
 
 
@@ -63,8 +70,9 @@ respective Webkit2 / GTK3 requirements to their proper places.
 Afterwards enter the following command to build and install sighte (if
 necessary as root):
 
-    make clean install
-
+```
+make install
+```
 
 # Running sighte
 
@@ -78,17 +86,19 @@ See the manpage for further options.
 
 By default, the browser opens to the home page specified in config.h
 
-Ctrl-w opens a new window.
+* Ctrl-w opens a new window.
 
-Ctrl-g will navigate the user to given URL.
+* Ctrl-g will navigate the user to the given URL.
 
-Ctrl-h returns the user back to the home page.
+* Ctrl-h returns the user back to the home page.
 
-Ctrl-f allows you to search for text.
+* Ctrl-f allows you to search for text.
 
-Ctrl-/ does the same as the above.
+* Ctrl-/ does the same as the above.
 
-Ctrl-n takes you next find result.
+* Ctrl-n takes you to the next find result.
+
+* Ctrl-N takes you to the previous find result.
 
 See the man page for more information.
 
