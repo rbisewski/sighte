@@ -245,13 +245,9 @@ void cookiejar_finalize(GObject*);
 
 //! Assemble our new cookie jar file, based on the given policy. 
 /*
- * @param   string                     cookie jar filename
- * @param   bool                       whether or not our file is read only
- * @param   SoupCookieJarAcceptPolicy  browser cookie policy
- *
- * @return  SoupCookieJar              newly generated cookie jar
+ * @return  SoupCookieJar    newly generated cookie jar
  */
-SoupCookieJar* cookiejar_new(const char*, bool, SoupCookieJarAcceptPolicy);
+SoupCookieJar* cookiejar_new(void);
 
 //! Set a property of a cookie inside of our cookie jar.
 /*!

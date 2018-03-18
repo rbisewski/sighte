@@ -46,8 +46,9 @@ static double zoomlevel = 1.0;
 // a: accept nothing
 // @: accept all except third party
 //
-static const char *cookiefile     = CACHE_DATA_PATH"/cookies.txt";
-static const char *cookiepolicies = "Aa@";
+static const char *cookiefile      = CACHE_DATA_PATH"/cookies.txt";
+static const char *cookiepolicies  = "Aa@";
+static bool cookiefile_is_readonly = false;
 
 // Downloaded files location
 static const char* downloads_location = "~/";

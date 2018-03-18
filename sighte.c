@@ -613,23 +613,20 @@ void cookiejar_init(CookieJar *self)
 
 //! Assemble our new cookie jar file, based on the given policy.
 /*
- * @param   string                     cookie jar filename
- * @param   bool                       whether or not our file is read only
- * @param   SoupCookieJarAcceptPolicy  browser cookie policy
- *
- * @return  SoupCookieJar              newly generated cookie jar
+ * @return  SoupCookieJar    newly generated cookie jar
  */
-SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
-  SoupCookieJarAcceptPolicy policy)
+SoupCookieJar* cookiejar_new(void)
 {
+    char* new_cookie_file = buildfile(cookiefile);
+
     // Return our new cookie jar object.
     return g_object_new(COOKIEJAR_TYPE,
                         SOUP_COOKIE_JAR_TEXT_FILENAME,
-                        filename,
+                        new_cookie_file,
                         SOUP_COOKIE_JAR_READ_ONLY,
-                        read_only,
+                        cookiefile_is_readonly,
                         SOUP_COOKIE_JAR_ACCEPT_POLICY,
-                        policy,
+                        cookiepolicy_get(),
                         NULL);
 }
 
@@ -2578,10 +2575,8 @@ void setup(void)
 
     // Assemble the paths needed to make basic browser functionality work.
     downloads_location = buildpath(downloads_location);
-    cookiefile = buildfile(cookiefile);
     scriptfile = buildfile(scriptfile);
     cachefolder = buildpath(cachefolder);
-
 
     // if a custom CSS file was specified, attempt to use it
     if (styledir != NULL && stylefile != NULL) {
@@ -2595,8 +2590,7 @@ void setup(void)
 
     // Add the cookie jar
     soup_session_add_feature(default_soup_session,
-                             SOUP_SESSION_FEATURE(cookiejar_new(cookiefile,
-                             FALSE, cookiepolicy_get())));
+                             SOUP_SESSION_FEATURE(cookiejar_new()));
 
     // If disk caching, then go ahead and use it.
     if (enablediskcache) {
