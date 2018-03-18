@@ -32,8 +32,8 @@
 #define CLEANMASK(mask)   (mask & (GDK_CONTROL_MASK|GDK_SHIFT_MASK))
 
 // Soup and Cookie related macros.
-//#define COOKIEJAR_TYPE    (cookiejar_get_type ())
-//#define COOKIEJAR(obj)    (G_TYPE_CHECK_INSTANCE_CAST ((obj), COOKIEJAR_TYPE, CookieJar))
+#define COOKIEJAR_TYPE    (soup_cookie_jar_get_type ())
+#define COOKIEJAR(obj)    (G_TYPE_CHECK_INSTANCE_CAST ((obj), COOKIEJAR_TYPE, CookieJar))
 
 // Define the dialog action values.
 #define DIALOG_ACTION_NONE 0
@@ -251,7 +251,7 @@ void cookiejar_finalize(GObject*);
  *
  * @return  SoupCookieJar              newly generated cookie jar
  */
-//SoupCookieJar* cookiejar_new(const char*, bool, SoupCookieJarAcceptPolicy);
+SoupCookieJar* cookiejar_new(const char*, bool, SoupCookieJarAcceptPolicy);
 
 //! Set a property of a cookie inside of our cookie jar.
 /*!

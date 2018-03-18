@@ -619,7 +619,6 @@ void cookiejar_init(CookieJar *self)
  *
  * @return  SoupCookieJar              newly generated cookie jar
  */
-/*
 SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
   SoupCookieJarAcceptPolicy policy)
 {
@@ -633,7 +632,6 @@ SoupCookieJar* cookiejar_new(const char *filename, bool read_only,
                         policy,
                         NULL);
 }
-*/
 
 //! Set a property of a cookie inside of our cookie jar.
 /*!
@@ -2596,11 +2594,9 @@ void setup(void)
     default_soup_session = soup_session_new();
 
     // Add the cookie jar
-    /*
     soup_session_add_feature(default_soup_session,
                              SOUP_SESSION_FEATURE(cookiejar_new(cookiefile,
                              FALSE, cookiepolicy_get())));
-    */
 
     // If disk caching, then go ahead and use it.
     if (enablediskcache) {
