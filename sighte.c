@@ -183,15 +183,14 @@ void prerequest(WebKitWebView *w, WebKitWebResource *r,
     // actually printable ASCII (e.g. not \EOF or the like).
     for (i = 0; i < strlen(uri); i++) {
 
-        // If it's not printable...
-        if (!g_ascii_isprint(uri[i])) {
+        // Skip printable characters
+        if (g_ascii_isprint(uri[i])) continue;
 
-            // Tell the developer that an invalid character was detected.
-            print_debug("prerequest() --> Non-ascii URI was detected.\n");
+        // Tell the developer that an invalid character was detected.
+        print_debug("prerequest() --> Non-ascii URI was detected.\n");
 
-            // Consider the event complete.
-            return;
-        }
+        // Consider the event complete.
+        return;
     }
 
     // Quote the request URI to prevent horrible accidents.
@@ -250,8 +249,8 @@ char* buildfile(const char *path)
     }
 
     // Variable declaration
-    char *fpath = NULL;
-    FILE *f     = NULL;
+    char *fpath     = NULL;
+    int file_status = -1;
 
     // Assemble our filepath string
     fpath = g_build_filename(buildpath(g_path_get_dirname(path)),
@@ -264,22 +263,15 @@ char* buildfile(const char *path)
         terminate("Insufficient memory for path: %s\n", path);
     }
 
-    // Attempt to open-append our file.
-    f = fopen(fpath, "a");
-
-    // safety check, ensure this could actually obtain a file
-    if (!f) {
+    file_status = open(fpath, O_WRONLY | O_CREAT | O_APPEND, 0600);
+    if (file_status == -1) {
         terminate("Could not open file: %s\n", fpath);
     }
 
-    // Set the file so that only the pid owner can read/write to it.
-    if (chmod(fpath, 0600) != 0) {
-        fclose(f);
-        terminate("Unable to alter permissions of file: %s\n", fpath);
+    file_status = close(file_status);
+    if (file_status == -1) {
+        terminate("Could not close file: %s\n", fpath);
     }
-
-    // Close our file.
-    fclose(f);
 
     // Finally, we can return our file path location.
     return fpath;
