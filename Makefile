@@ -1,11 +1,3 @@
-# Version
-VERSION = `date +%y.%m`
-
-# If unable to grab the version, default to N/A
-ifndef VERSION
-    VERSION = "n/a"
-endif
-
 PREFIX    = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
