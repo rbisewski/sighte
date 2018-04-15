@@ -630,26 +630,34 @@ SoupCookieJar* cookiejar_new(void)
  * @param   GParamSpec     glib specifications parameter
  *
  * @return  none
+ *
+ * TODO: get this working again
  */
-/*
 void cookiejar_set_property(GObject *self, unsigned int prop_id,
   const GValue *value, GParamSpec *pspec)
 {
+    // voidify
+    prop_id = prop_id;
+    value = value;
+    pspec = pspec;
+
     // Place a shared lock on our cookie jar file.
     flock(COOKIEJAR(self)->lock, LOCK_SH);
 
+    // TODO: fix this
     // Define the intended property in the cookie file.
+    /*
     G_OBJECT_CLASS(cookiejar_parent_class)->set_property(self,
                                                          prop_id,
                                                          value,
                                                          pspec);
+    */
     // Remove the shared lock on our cookie jar file.
     flock(COOKIEJAR(self)->lock, LOCK_UN);
 
     // Return from here.
     return;
 }
-*/
 
 //! Check our current cookies policy to determine how we want to handle
 //! incoming cookies.
