@@ -730,9 +730,11 @@ void runscript(Client *c)
         return;
     }
 
-    // Variable declaration
     char *script = NULL;
-    JSValueRef js_exception = NULL;
+    gssize script_size = 0;
+    JSCException* jsc_exception = NULL;
+    JSCContext* jsc_context = NULL;
+    JSCValue* jsc_result = NULL;
 
     // Sanity check, make sure this has a user-defined script file to append
     // various code for certain JS functionality.
@@ -755,66 +757,30 @@ void runscript(Client *c)
         return;
     }
 
-    // Convert the script values into a JS-safe string.
-    JSStringRef js_str = JSStringCreateWithUTF8CString(script);
+    script_size = (gssize) strlen(script);
 
-    // Sanity check, make sure this returned a valid reference.
-    if (!js_str) {
-        free(script);
+    jsc_context = jsc_context_new();
+    if (!jsc_context) {
+        print_debug("runscript() --> Unable to obtain global JS context.\n");
         return;
     }
 
-    // Dump the script file into a JS-safe string.
-    JSStringRef js_str_file = JSStringCreateWithUTF8CString(scriptfile);
-
-    // Sanity check, make sure this returned a valid reference.
-    if (!js_str_file) {
-        print_debug("runscript() --> Unable to JS stringify "
-          "the following file: %s\n", scriptfile);
-        free(script);
+    jsc_result = jsc_context_evaluate(jsc_context, script, script_size);
+    if (!jsc_result) {
+        print_debug("runscript() --> Unable to evaluate javascript code.\n");
         return;
     }
 
-    // Grab the global JS context, since the JS being executed needs to be
-    // accomplished in the given window view.
-    JSObjectRef js_obj = JSContextGetGlobalObject(
-      webkit_web_view_get_javascript_global_context(c->view));
-
-    // Sanity check, make sure this returned a valid reference.
-    if (!js_obj) {
-        print_debug("runscript() --> Unable to grab primary JS global "
-          "context.\n");
-        free(script);
+    jsc_exception = jsc_context_get_exception(jsc_context);
+    if (!jsc_exception) {
+        print_debug("runscript() --> Exception detected when running JS code.\n");
         return;
     }
-
-    // Grab the client-wide Javascript context
-    JSGlobalContextRef js_view_global
-      = webkit_web_view_get_javascript_global_context(c->view);
-
-    // Sanity check, make sure this actually got one...
-    if (!js_view_global) {
-        print_debug("runscript() --> Unable to grab secondary JS global "
-          "context.\n");
-        free(script);
-        return;
-    }
-
-    // Attempt to evaluate the script syntax, since very nasty scripts can
-    // potentially cause all sorts of pain to the end-user.
-    if (!JSCheckScriptSyntax(js_view_global, js_str, js_str_file, 0,
-      &js_exception)) {
-        print_debug("runscript() --> Invalid JS syntax detected.\n");
-        free(script);
-        return;
-    }
-
-    // Using our JS location and content data, go ahead and make an
-    // attempt at evaluating the given script.
-    JSEvaluateScript(js_view_global, js_str, js_obj, js_str_file, 0, &js_exception);
 
     // Free up all of the current utilized memory.
     free(script);
+    script = NULL;
+    script_size = 0;
 
     // Having evaluted our script, we can simply return here.
     return;
