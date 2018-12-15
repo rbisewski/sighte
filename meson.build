@@ -1,7 +1,7 @@
 #
 # Project
 #
-project('sighte','c', default_options : ['c_std=c99'])
+project('sighte','c', default_options : ['c_std=c11'])
 
 #
 # Version

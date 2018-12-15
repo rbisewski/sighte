@@ -25,7 +25,6 @@
 #include <gdk/gdkx.h>
 #include <gdk/gdkkeysyms.h>
 #include <webkit2/webkit2.h>
-#include <JavaScriptCore/JavaScript.h>
 
 // Key and Button related macros.
 #define LENGTH(x)         (sizeof(x) / sizeof(x[0]))
